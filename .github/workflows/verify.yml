@@ -15,9 +15,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v6
         with:
-          go-version: "1.24.x"
+          go-version: "1.23.x"
       - name: Generate templ components
-        run: go tool templ generate
+        run: go run github.com/a-h/templ/cmd/templ@v0.3.1001 generate
       - name: Test
         run: go test ./...
       - name: Build
