@@ -1,11 +1,11 @@
 module github.com/james-yusuke/diary-blog
 
-go 1.26.4
+go 1.24.0
 
 tool github.com/a-h/templ/cmd/templ
 
 require (
-	github.com/a-h/templ v0.3.1020
+	github.com/a-h/templ v0.3.1001
 	github.com/syumai/workers v0.33.0
 	github.com/yuin/goldmark v1.7.16
 	gopkg.in/yaml.v3 v3.0.1
@@ -22,8 +22,8 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/natefinch/atomic v1.0.1 // indirect
 	golang.org/x/mod v0.26.0 // indirect
-	golang.org/x/net v0.51.0 // indirect
+	golang.org/x/net v0.42.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
 	golang.org/x/tools v0.35.0 // indirect
 )
