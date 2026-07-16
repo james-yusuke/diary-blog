@@ -1,0 +1,14 @@
+{
+  "name": "diary-blog",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "generate": "go tool templ generate && go run ./cmd/workergen",
+    "build": "npm run generate && go run github.com/syumai/workers/cmd/workers-assets-gen && tinygo build -tags tinygo -o ./build/app.wasm -target wasm -no-debug ./cmd/diary",
+    "dev": "npm run build && wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^3.109.2"
+  }
+}

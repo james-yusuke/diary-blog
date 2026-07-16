@@ -1,0 +1,110 @@
+package content
+
+import (
+	"sort"
+	"strings"
+	"time"
+)
+
+type SiteConfig struct {
+	Title         string `yaml:"title"`
+	AuthorName    string `yaml:"author_name"`
+	Description   string `yaml:"description"`
+	Bio           string `yaml:"bio"`
+	GitHubURL     string `yaml:"github_url"`
+	RepositoryURL string `yaml:"repository_url"`
+	BaseURL       string `yaml:"base_url"`
+}
+
+type Post struct {
+	Slug        string
+	Title       string
+	Summary     string
+	Published   time.Time
+	Tags        []string
+	Body        string
+	HTML        string
+	ReadingMins int
+}
+
+func (p Post) URL() string         { return "/posts/" + p.Slug }
+func (p Post) DisplayDate() string { return p.Published.Format("2006.01.02") }
+
+type Tag struct {
+	Name  string
+	Count int
+}
+
+type Store struct {
+	Site   SiteConfig
+	Posts  []Post
+	bySlug map[string]Post
+	byTag  map[string][]Post
+}
+
+func NewStore(site SiteConfig, posts []Post) *Store {
+	store := &Store{Site: site, Posts: posts, bySlug: make(map[string]Post), byTag: make(map[string][]Post)}
+	sort.Slice(store.Posts, func(i, j int) bool { return store.Posts[i].Published.After(store.Posts[j].Published) })
+	for _, post := range store.Posts {
+		store.bySlug[post.Slug] = post
+		for _, tag := range post.Tags {
+			store.byTag[tag] = append(store.byTag[tag], post)
+		}
+	}
+	for tag := range store.byTag {
+		sort.Slice(store.byTag[tag], func(i, j int) bool { return store.byTag[tag][i].Published.After(store.byTag[tag][j].Published) })
+	}
+	return store
+}
+
+func (s *Store) Find(slug string) (Post, bool) { post, ok := s.bySlug[slug]; return post, ok }
+func (s *Store) Search(query string) []Post {
+	query = strings.ToLower(strings.TrimSpace(query))
+	if query == "" {
+		return s.Posts
+	}
+	var matches []Post
+	for _, post := range s.Posts {
+		haystack := strings.ToLower(post.Title + " " + post.Summary + " " + strings.Join(post.Tags, " ") + " " + post.Body)
+		if strings.Contains(haystack, query) {
+			matches = append(matches, post)
+		}
+	}
+	return matches
+}
+func (s *Store) PostsForTag(tag string) []Post { return s.byTag[tag] }
+func (s *Store) Tags() []Tag {
+	tags := make([]Tag, 0, len(s.byTag))
+	for name, posts := range s.byTag {
+		tags = append(tags, Tag{Name: name, Count: len(posts)})
+	}
+	sort.Slice(tags, func(i, j int) bool {
+		if tags[i].Count == tags[j].Count {
+			return tags[i].Name < tags[j].Name
+		}
+		return tags[i].Count > tags[j].Count
+	})
+	return tags
+}
+func (s *Store) Related(post Post) []Post {
+	var related []Post
+	for _, candidate := range s.Posts {
+		if candidate.Slug != post.Slug && sharesTag(post, candidate) {
+			related = append(related, candidate)
+			if len(related) == 3 {
+				break
+			}
+		}
+	}
+	return related
+}
+func sharesTag(a, b Post) bool {
+	for _, tagA := range a.Tags {
+		for _, tagB := range b.Tags {
+			if tagA == tagB {
+				return true
+			}
+		}
+	}
+	return false
+}
