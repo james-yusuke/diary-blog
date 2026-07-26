@@ -1,7 +1,7 @@
 title: diary
 author_name: James Yusuke
-description: Go、Web、そして日々の設計について記録する個人技術ブログ。
-bio: ソフトウェアをつくりながら、技術を人に届くかたちへ整えることを考えています。
+description: james-yusukeの個人的なブログです。
+bio: 個人的なことを載せてます。日記のようなものです。
 github_url: https://github.com/james-yusuke
 repository_url: https://github.com/james-yusuke/diary-blog
 base_url: http://localhost:8080
