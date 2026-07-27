@@ -39,16 +39,14 @@ git clone git@github.com:james-yusuke/zenn.git content/zenn
 
 `content/zenn/articles` 配下の Markdown は、Zenn の front matter として読み込みます。ファイル名が diary 上の slug、`topics` がタグ、本文先頭段落が一覧・RSS用の概要になります。`published: false` は非公開で、公開する記事では `published_at` が必須です。日時が未来の場合は指定時刻まで diary でも公開されません。
 
-Zenn リポジトリの更新を反映するには、`content/zenn` で pull してから diary を再ビルドします。Cloudflare とGitHub Actionsはビルド時に Zenn リポジトリを clone します。Worker はビルド時に記事を埋め込むため、公開済みの Worker に private リポジトリの鍵は含まれません。
+Zenn リポジトリの更新を反映するには、`content/zenn` で pull した後に `make worker-generate` を実行し、生成された `internal/content/embedded_tinygo_gen.go` をMarkdownと一緒にコミットします。Worker はこのコミット済みスナップショットを使うため、Cloudflare のビルド環境が private リポジトリへアクセスする必要はありません。公開済みの Worker に private リポジトリの鍵は含まれません。
 
 GitHub Actions では、fine-grained personal access token を発行し、対象リポジトリを `james-yusuke/zenn` のみに絞り、Repository permissions の **Contents: Read-only** だけを許可します。token は diary リポジトリの `ZENN_REPO_TOKEN` Actions Secret に登録します。fork からの pull request では token を使わず、fixture ベースの検証だけが実行されます。
-
-Cloudflare Workers Builds でも同じ名前の `ZENN_REPO_TOKEN` を Build Secret として登録し、ビルドコマンドで Zenn を clone します。
 
 Cloudflare の Build command には次を設定します。
 
 ```sh
-git clone --depth=1 "https://x-access-token:${ZENN_REPO_TOKEN}@github.com/james-yusuke/zenn.git" content/zenn && mkdir -p "$HOME/.local" && curl -fsSL https://github.com/tinygo-org/tinygo/releases/download/v0.38.0/tinygo0.38.0.linux-amd64.tar.gz | tar -xz -C "$HOME/.local" && TINYGO="$HOME/.local/tinygo/bin/tinygo" make worker-build
+mkdir -p "$HOME/.local" && curl -fsSL https://github.com/tinygo-org/tinygo/releases/download/v0.38.0/tinygo0.38.0.linux-amd64.tar.gz | tar -xz -C "$HOME/.local" && TINYGO="$HOME/.local/tinygo/bin/tinygo" make worker-build
 ```
 
 ## 検証
@@ -71,17 +69,19 @@ Cloudflare Workersでは実行時にローカルファイルを読めないた�
 - Binaryen（`wasm-opt`。macOSでは `brew install binaryen`）
 - Node.js と `npm install`（WranglerによるローカルWorker実行時のみ）
 
-Worker用の成果物を生成します。デプロイは実行しません。
+MarkdownからWorker用コンテンツを更新して成果物を生成します。デプロイは実行しません。
 
 ```sh
-make GO=go1.23.6 worker-build
+make GO=go1.23.6 worker-release-build
 ```
 
 TinyGo 0.41.1 はこの Worker の `net/http` 依存を `-target wasm` でビルドする際に不具合があるため、0.38.0 を使います。Homebrew の最新版を置き換えずに使う場合は、0.38.0 の macOS archive を展開し、次のように実行します。
 
 ```sh
-TINYGO="$HOME/.local/tinygo/bin/tinygo" make GO=go1.23.6 worker-build
+TINYGO="$HOME/.local/tinygo/bin/tinygo" make GO=go1.23.6 worker-release-build
 ```
+
+`worker-build` はコミット済みの生成コンテンツだけを使います。Cloudflare Workers Builds ではこちらを使い、private Zenn リポジトリのcloneやtoken設定は不要です。
 
 `build/app.wasm`、`build/worker.mjs`、`build/wasm_exec.js`、`build/runtime.mjs` がCloudflare Workers用の一式です。Wranglerを利用する場合は、同じGoツールチェーンを選んでから次を実行します。
 
