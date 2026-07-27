@@ -14,10 +14,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # Secrets are unavailable to fork PRs, so those runs use fixture tests.
-          submodules: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
-          # Fine-grained PAT: access is restricted to james-yusuke/zenn only.
-          token: ${{ secrets.ZENN_REPO_TOKEN }}
+          submodules: false
+      - name: Initialize private Zenn submodule
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          ZENN_REPO_TOKEN: ${{ secrets.ZENN_REPO_TOKEN }}
+        run: |
+          if [ -z "$ZENN_REPO_TOKEN" ]; then
+            echo "ZENN_REPO_TOKEN is not configured; skipping private submodule checkout."
+            exit 0
+          fi
+          git config --global url."https://x-access-token:${ZENN_REPO_TOKEN}@github.com/james-yusuke/zenn.git".insteadOf "git@github.com:james-yusuke/zenn.git"
+          git submodule update --init --recursive
       - uses: actions/setup-go@v6
         with:
           go-version: "1.23.x"
@@ -29,6 +37,12 @@ jobs:
         run: go build ./...
       - name: Verify generated Worker content
         if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          ZENN_REPO_TOKEN: ${{ secrets.ZENN_REPO_TOKEN }}
         run: |
+          if [ -z "$ZENN_REPO_TOKEN" ]; then
+            echo "ZENN_REPO_TOKEN is not configured; skipping private content generation check."
+            exit 0
+          fi
           go run ./cmd/workergen
           git diff --exit-code -- internal/content/embedded_tinygo_gen.go internal/site/assets_tinygo_gen.go
