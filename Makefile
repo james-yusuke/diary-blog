@@ -1,4 +1,5 @@
 GO ?= go
+TINYGO ?= tinygo
 
 .PHONY: generate worker-generate run test build worker-build
 
@@ -19,4 +20,4 @@ build: generate
 
 worker-build: worker-generate
 	$(GO) run github.com/syumai/workers/cmd/workers-assets-gen
-	PATH=$$($(GO) env GOROOT)/bin:$$PATH GOROOT=$$($(GO) env GOROOT) tinygo build -tags tinygo -o ./build/app.wasm -target wasm -no-debug -opt=z ./cmd/diary
+	PATH=$$($(GO) env GOROOT)/bin:$$PATH GOROOT=$$($(GO) env GOROOT) $(TINYGO) build -tags tinygo -o ./build/app.wasm -target wasm -no-debug -opt=z ./cmd/diary

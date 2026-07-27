@@ -59,7 +59,7 @@ Cloudflare Workersでは実行時にローカルファイルを読めないた�
 必要なもの：
 
 - Go 1.23 系（TinyGo 0.38との互換性のため）
-- TinyGo 0.38 以降
+- TinyGo 0.38.0（Go 1.23 系との組み合わせ）
 - Binaryen（`wasm-opt`。macOSでは `brew install binaryen`）
 - Node.js と `npm install`（WranglerによるローカルWorker実行時のみ）
 
@@ -67,6 +67,12 @@ Worker用の成果物を生成します。デプロイは実行しません。
 
 ```sh
 make GO=go1.23.6 worker-build
+```
+
+TinyGo 0.41.1 はこの Worker の `net/http` 依存を `-target wasm` でビルドする際に不具合があるため、0.38.0 を使います。Homebrew の最新版を置き換えずに使う場合は、0.38.0 の macOS archive を展開し、次のように実行します。
+
+```sh
+TINYGO="$HOME/.local/tinygo/bin/tinygo" make GO=go1.23.6 worker-build
 ```
 
 `build/app.wasm`、`build/worker.mjs`、`build/wasm_exec.js`、`build/runtime.mjs` がCloudflare Workers用の一式です。Wranglerを利用する場合は、同じGoツールチェーンを選んでから次を実行します。
