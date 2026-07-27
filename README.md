@@ -31,7 +31,7 @@ make run
 
 ## Zenn記事の取り込み
 
-private な [`james-yusuke/zenn`](https://github.com/james-yusuke/zenn) は `content/zenn` の Git submodule として管理します。clone 後と Zenn の参照コミット更新後には、SSH でアクセスできる状態で次を実行してください。
+private な [`james-yusuke/zenn`](https://github.com/james-yusuke/zenn) は `content/zenn` の Git submodule として管理します。submodule は親リポジトリと同じ認証方式を使うため、clone 後と Zenn の参照コミット更新後には GitHub へアクセスできる状態で次を実行してください。
 
 ```sh
 git submodule update --init --recursive

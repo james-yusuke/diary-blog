@@ -24,7 +24,7 @@ jobs:
             echo "ZENN_REPO_TOKEN is not configured; skipping private submodule checkout."
             exit 0
           fi
-          git config --global url."https://x-access-token:${ZENN_REPO_TOKEN}@github.com/james-yusuke/zenn.git".insteadOf "git@github.com:james-yusuke/zenn.git"
+          git config --global url."https://x-access-token:${ZENN_REPO_TOKEN}@github.com/james-yusuke/zenn.git".insteadOf "https://github.com/james-yusuke/zenn.git"
           git submodule update --init --recursive
       - uses: actions/setup-go@v6
         with:
