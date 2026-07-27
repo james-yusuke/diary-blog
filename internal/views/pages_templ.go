@@ -878,7 +878,7 @@ func AboutPage(site content.SiteConfig) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, "<main id=\"main\" class=\"shell about\"><p class=\"eyebrow\">ABOUT DIARY</p><h1>考えたことを、<br>実装のそばに。</h1><div class=\"about-grid\"><div><p class=\"about-lead\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 67, "<main id=\"main\" class=\"shell about\"><p class=\"eyebrow\">ABOUT DIARY</p><h1>自己紹介&連絡先</h1><div class=\"about-grid\"><div><p class=\"about-lead\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

@@ -175,7 +175,7 @@ templ AboutPage(site content.SiteConfig) {
 	@Layout(site, "About — "+site.Title) {
 		<main id="main" class="shell about">
 			<p class="eyebrow">ABOUT DIARY</p>
-			<h1>考えたことを、<br/>実装のそばに。</h1>
+			<h1>自己紹介&連絡先</h1>
 			<div class="about-grid">
 				<div><p class="about-lead">{ site.Bio }</p><p>diary は、GoやWeb開発を中心に、設計の判断や手を動かして得た学びを記録する個人ブログです。完成形だけでなく、迷った理由も残します。</p></div>
 				<aside><p class="eyebrow">WRITTEN BY</p><h2>{ site.AuthorName }</h2><a class="text-link" href={ templ.SafeURL(site.GitHubURL) }>GitHubを見る →</a><p class="repo-note">記事は <a href={ templ.SafeURL(site.RepositoryURL) }>GitHubリポジトリ</a> のMarkdownで管理しています。</p></aside>
