@@ -41,7 +41,7 @@ git submodule update --init --recursive
 
 Zenn リポジトリの更新を反映するには、submodule を更新し、diary 側の参照コミットをコミットしてください。Worker はビルド時に記事を埋め込むため、公開済みの Worker に private リポジトリの鍵は含まれません。
 
-GitHub Actions では、zenn リポジトリへ読み取り専用の Deploy Key を登録し、対応する秘密鍵を diary リポジトリの `ZENN_DEPLOY_KEY` Actions Secret に登録します。fork からの pull request では秘密鍵を使わず、fixture ベースの検証だけが実行されます。
+GitHub Actions では、fine-grained personal access token を発行し、対象リポジトリを `james-yusuke/zenn` のみに絞り、Repository permissions の **Contents: Read-only** だけを許可します。token は diary リポジトリの `ZENN_REPO_TOKEN` Actions Secret に登録します。fork からの pull request では token を使わず、fixture ベースの検証だけが実行されます。
 
 ## 検証
 

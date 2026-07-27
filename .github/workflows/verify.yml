@@ -16,7 +16,8 @@ jobs:
         with:
           # Secrets are unavailable to fork PRs, so those runs use fixture tests.
           submodules: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
-          ssh-key: ${{ secrets.ZENN_DEPLOY_KEY }}
+          # Fine-grained PAT: access is restricted to james-yusuke/zenn only.
+          token: ${{ secrets.ZENN_REPO_TOKEN }}
       - uses: actions/setup-go@v6
         with:
           go-version: "1.23.x"
