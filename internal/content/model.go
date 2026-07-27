@@ -43,6 +43,22 @@ type Store struct {
 }
 
 func NewStore(site SiteConfig, posts []Post) *Store {
+	return NewStoreAt(site, posts, time.Now())
+}
+
+// NewStoreAt builds the public post indexes as of now. It is explicit so
+// scheduled-post behavior can be tested without relying on the system clock.
+func NewStoreAt(site SiteConfig, posts []Post, now time.Time) *Store {
+	visiblePosts := make([]Post, 0, len(posts))
+	for _, post := range posts {
+		if !post.Published.After(now) {
+			visiblePosts = append(visiblePosts, post)
+		}
+	}
+	return newStore(site, visiblePosts)
+}
+
+func newStore(site SiteConfig, posts []Post) *Store {
 	store := &Store{Site: site, Posts: posts, bySlug: make(map[string]Post), byTag: make(map[string][]Post)}
 	sort.Slice(store.Posts, func(i, j int) bool { return store.Posts[i].Published.After(store.Posts[j].Published) })
 	for _, post := range store.Posts {

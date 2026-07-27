@@ -3,8 +3,6 @@
 
 package content
 
-import "time"
-
-var embeddedSite = SiteConfig{Title: "diary", AuthorName: "James Yusuke", Description: "Go、Web、そして日々の設計について記録する個人技術ブログ。", Bio: "ソフトウェアをつくりながら、技術を人に届くかたちへ整えることを考えています。", GitHubURL: "https://github.com/james-yusuke", RepositoryURL: "https://github.com/james-yusuke/diary-blog", BaseURL: "http://localhost:8080"}
+var embeddedSite = SiteConfig{Title: "diary", AuthorName: "James Yusuke", Description: "james-yusukeの個人的なブログです。", Bio: "個人的なことを載せてます。日記のようなものです。", GitHubURL: "https://github.com/james-yusuke", RepositoryURL: "https://github.com/james-yusuke/diary-blog", BaseURL: "http://localhost:8080"}
 
 var embeddedPosts = []Post{}

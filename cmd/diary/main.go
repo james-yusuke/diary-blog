@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	app, err := site.New("config/site.yaml", "content/posts")
+	app, err := site.New("config/site.yaml", "content")
 	if err != nil {
 		log.Fatal(err)
 	}

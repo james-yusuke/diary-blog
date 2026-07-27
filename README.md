@@ -1,6 +1,6 @@
 # diary
 
-James Yusuke が書く、Go・Web・設計についての個人技術ブログです。記事はこのGitHubリポジトリでMarkdownとして管理します。
+James Yusuke が書く、Go・Web・設計についての個人技術ブログです。記事はこのGitHubリポジトリでMarkdownとして管理します。`content` 配下は再帰的に読み込まれるため、通常記事は好きなフォルダ構成で整理できます。
 
 ## 必要なもの
 
@@ -22,12 +22,26 @@ make run
 
 ## 記事を書く
 
-1. `content/posts/TEMPLATE.md` を複製し、日付と内容に合う名前へ変更します。
+1. `content/posts/TEMPLATE.md` を複製し、`content` 配下の任意のフォルダへ配置します。
 2. front matter の `slug`、`title`、`summary`、`published_at`、`tags` を設定します。
 3. `draft: true` の間は一覧・RSSには出ません。公開するときは削除するか `false` にします。
 4. MarkdownをコミットしてGitHubへプッシュします。
 
 記事の一覧、タグ、検索、RSSはfront matterから自動で組み立てられます。不正なメタデータやslugの重複は起動時にエラーになります。
+
+## Zenn記事の取り込み
+
+private な [`james-yusuke/zenn`](https://github.com/james-yusuke/zenn) は `content/zenn` の Git submodule として管理します。clone 後と Zenn の参照コミット更新後には、SSH でアクセスできる状態で次を実行してください。
+
+```sh
+git submodule update --init --recursive
+```
+
+`content/zenn/articles` 配下の Markdown は、Zenn の front matter として読み込みます。ファイル名が diary 上の slug、`topics` がタグ、本文先頭段落が一覧・RSS用の概要になります。`published: false` は非公開で、公開する記事では `published_at` が必須です。日時が未来の場合は指定時刻まで diary でも公開されません。
+
+Zenn リポジトリの更新を反映するには、submodule を更新し、diary 側の参照コミットをコミットしてください。Worker はビルド時に記事を埋め込むため、公開済みの Worker に private リポジトリの鍵は含まれません。
+
+GitHub Actions では、zenn リポジトリへ読み取り専用の Deploy Key を登録し、対応する秘密鍵を diary リポジトリの `ZENN_DEPLOY_KEY` Actions Secret に登録します。fork からの pull request では秘密鍵を使わず、fixture ベースの検証だけが実行されます。
 
 ## 検証
 
@@ -40,7 +54,7 @@ GitHub Actionsもmainブランチへのpushとpull requestで、templ生成・�
 
 ## Cloudflare Workers（TinyGo）
 
-Cloudflare Workersでは実行時にローカルファイルを読めないため、Workerビルド時に `content/posts`、`config/site.yaml`、`assets/site.css` をGoソースへ変換してWasmに含めます。記事の正本は引き続きこのリポジトリのMarkdownです。
+Cloudflare Workersでは実行時にローカルファイルを読めないため、Workerビルド時に `content`、`config/site.yaml`、`assets/site.css` をGoソースへ変換してWasmに含めます。記事の正本は引き続きこのリポジトリのMarkdownです。
 
 必要なもの：
 

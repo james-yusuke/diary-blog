@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -19,7 +20,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var slugPattern = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
+var (
+	slugPattern         = regexp.MustCompile(`^[a-z0-9]+(?:[-_][a-z0-9]+)*$`)
+	markdownLinkPattern = regexp.MustCompile(`!?\[([^\]]+)\]\([^)]*\)`)
+)
 
 type postMeta struct {
 	Slug      string    `yaml:"slug"`
@@ -30,53 +34,104 @@ type postMeta struct {
 	Draft     bool      `yaml:"draft"`
 }
 
-func Load(configPath, postsDir string) (*Store, error) {
-	configBytes, err := os.ReadFile(configPath)
-	if err != nil {
-		return nil, fmt.Errorf("read site configuration: %w", err)
-	}
-	var site SiteConfig
-	if err := yaml.Unmarshal(configBytes, &site); err != nil {
-		return nil, fmt.Errorf("parse site configuration: %w", err)
-	}
-	if site.Title == "" || site.AuthorName == "" || site.Description == "" {
-		return nil, errors.New("site configuration requires title, author_name, and description")
-	}
+type zennMeta struct {
+	Title       string   `yaml:"title"`
+	Topics      []string `yaml:"topics"`
+	Published   *bool    `yaml:"published"`
+	PublishedAt string   `yaml:"published_at"`
+}
 
-	entries, err := os.ReadDir(postsDir)
+// Load reads diary posts from contentDir. Markdown below zenn/articles uses
+// Zenn's front matter; all other Markdown uses diary's front matter.
+func Load(configPath, contentDir string) (*Store, error) {
+	site, posts, err := loadSiteAndPosts(configPath, contentDir)
 	if err != nil {
-		return nil, fmt.Errorf("read posts directory: %w", err)
-	}
-	var posts []Post
-	seenSlugs := make(map[string]bool)
-	for _, entry := range entries {
-		if entry.IsDir() || filepath.Ext(entry.Name()) != ".md" {
-			continue
-		}
-		post, draft, err := parsePost(filepath.Join(postsDir, entry.Name()))
-		if err != nil {
-			return nil, err
-		}
-		if draft {
-			continue
-		}
-		if seenSlugs[post.Slug] {
-			return nil, fmt.Errorf("duplicate post slug %q", post.Slug)
-		}
-		seenSlugs[post.Slug] = true
-		posts = append(posts, post)
+		return nil, err
 	}
 	return NewStore(site, posts), nil
 }
 
-func parsePost(path string) (Post, bool, error) {
-	contents, err := os.ReadFile(path)
+// LoadAll reads every non-draft post, including scheduled posts. It is used by
+// the Worker generator so a post can become public without another deploy.
+func LoadAll(configPath, contentDir string) (*Store, error) {
+	site, posts, err := loadSiteAndPosts(configPath, contentDir)
 	if err != nil {
-		return Post{}, false, fmt.Errorf("read post %s: %w", path, err)
+		return nil, err
 	}
-	metaRaw, body, err := splitFrontMatter(string(contents))
+	return newStore(site, posts), nil
+}
+
+func loadSiteAndPosts(configPath, contentDir string) (SiteConfig, []Post, error) {
+	configBytes, err := os.ReadFile(configPath)
 	if err != nil {
-		return Post{}, false, fmt.Errorf("parse post %s: %w", path, err)
+		return SiteConfig{}, nil, fmt.Errorf("read site configuration: %w", err)
+	}
+	var site SiteConfig
+	if err := yaml.Unmarshal(configBytes, &site); err != nil {
+		return SiteConfig{}, nil, fmt.Errorf("parse site configuration: %w", err)
+	}
+	if site.Title == "" || site.AuthorName == "" || site.Description == "" {
+		return SiteConfig{}, nil, errors.New("site configuration requires title, author_name, and description")
+	}
+
+	posts, err := loadPosts(contentDir)
+	if err != nil {
+		return SiteConfig{}, nil, err
+	}
+	return site, posts, nil
+}
+
+func loadPosts(contentDir string) ([]Post, error) {
+	var posts []Post
+	seenSlugs := make(map[string]bool)
+	zennRoot := filepath.Join("zenn")
+	zennArticles := filepath.Join(zennRoot, "articles")
+	err := filepath.WalkDir(contentDir, func(path string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".md" {
+			return nil
+		}
+		rel, err := filepath.Rel(contentDir, path)
+		if err != nil {
+			return err
+		}
+		isZenn := rel == zennArticles || strings.HasPrefix(rel, zennArticles+string(filepath.Separator))
+		if strings.HasPrefix(rel, zennRoot+string(filepath.Separator)) && !isZenn {
+			return nil
+		}
+
+		var post Post
+		var draft bool
+		if isZenn {
+			post, draft, err = parseZennPost(path)
+		} else {
+			post, draft, err = parsePost(path)
+		}
+		if err != nil {
+			return err
+		}
+		if draft {
+			return nil
+		}
+		if seenSlugs[post.Slug] {
+			return fmt.Errorf("duplicate post slug %q", post.Slug)
+		}
+		seenSlugs[post.Slug] = true
+		posts = append(posts, post)
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("read content: %w", err)
+	}
+	return posts, nil
+}
+
+func parsePost(path string) (Post, bool, error) {
+	metaRaw, body, err := readFrontMatter(path)
+	if err != nil {
+		return Post{}, false, err
 	}
 	var meta postMeta
 	if err := yaml.Unmarshal([]byte(metaRaw), &meta); err != nil {
@@ -85,15 +140,66 @@ func parsePost(path string) (Post, bool, error) {
 	if err := validateMeta(meta); err != nil {
 		return Post{}, false, fmt.Errorf("validate post %s: %w", path, err)
 	}
+	post, err := renderPost(meta.Slug, meta.Title, meta.Summary, meta.Published, meta.Tags, body)
+	return post, meta.Draft, err
+}
+
+func parseZennPost(path string) (Post, bool, error) {
+	metaRaw, body, err := readFrontMatter(path)
+	if err != nil {
+		return Post{}, false, err
+	}
+	var meta zennMeta
+	if err := yaml.Unmarshal([]byte(metaRaw), &meta); err != nil {
+		return Post{}, false, fmt.Errorf("parse Zenn metadata %s: %w", path, err)
+	}
+	if err := validateZennMeta(meta, false); err != nil {
+		return Post{}, false, fmt.Errorf("validate Zenn post %s: %w", path, err)
+	}
+	if !*meta.Published {
+		return Post{}, true, nil
+	}
+	if err := validateZennMeta(meta, true); err != nil {
+		return Post{}, false, fmt.Errorf("validate Zenn post %s: %w", path, err)
+	}
+	published, err := parseZennPublishedAt(meta.PublishedAt)
+	if err != nil {
+		return Post{}, false, fmt.Errorf("validate Zenn post %s: %w", path, err)
+	}
+	summary, err := zennSummary(body)
+	if err != nil {
+		return Post{}, false, fmt.Errorf("validate Zenn post %s: %w", path, err)
+	}
+	slug := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+	if !slugPattern.MatchString(slug) {
+		return Post{}, false, fmt.Errorf("validate Zenn post %s: filename must be lowercase letters, digits, hyphens, or underscores", path)
+	}
+	post, err := renderPost(slug, meta.Title, summary, published, meta.Topics, body)
+	return post, false, err
+}
+
+func readFrontMatter(path string) (string, string, error) {
+	contents, err := os.ReadFile(path)
+	if err != nil {
+		return "", "", fmt.Errorf("read post %s: %w", path, err)
+	}
+	metaRaw, body, err := splitFrontMatter(string(contents))
+	if err != nil {
+		return "", "", fmt.Errorf("parse post %s: %w", path, err)
+	}
+	return metaRaw, body, nil
+}
+
+func renderPost(slug, title, summary string, published time.Time, tags []string, body string) (Post, error) {
 	var rendered bytes.Buffer
 	markdown := goldmark.New(goldmark.WithExtensions(extension.GFM), goldmark.WithParserOptions(parser.WithAutoHeadingID()))
 	if err := markdown.Convert([]byte(body), &rendered); err != nil {
-		return Post{}, false, fmt.Errorf("render post %s: %w", path, err)
+		return Post{}, fmt.Errorf("render post %s: %w", slug, err)
 	}
 	return Post{
-		Slug: meta.Slug, Title: meta.Title, Summary: meta.Summary, Published: meta.Published,
-		Tags: meta.Tags, Body: body, HTML: rendered.String(), ReadingMins: readingMins(body),
-	}, meta.Draft, nil
+		Slug: slug, Title: title, Summary: summary, Published: published,
+		Tags: tags, Body: body, HTML: rendered.String(), ReadingMins: readingMins(body),
+	}, nil
 }
 
 func splitFrontMatter(contents string) (string, string, error) {
@@ -111,7 +217,7 @@ func splitFrontMatter(contents string) (string, string, error) {
 
 func validateMeta(meta postMeta) error {
 	if !slugPattern.MatchString(meta.Slug) {
-		return errors.New("slug must be lowercase kebab-case")
+		return errors.New("slug must use lowercase letters, digits, hyphens, or underscores")
 	}
 	if strings.TrimSpace(meta.Title) == "" {
 		return errors.New("title is required")
@@ -125,14 +231,70 @@ func validateMeta(meta postMeta) error {
 	if len(meta.Tags) == 0 {
 		return errors.New("at least one tag is required")
 	}
+	return validateTags(meta.Tags)
+}
+
+func validateZennMeta(meta zennMeta, requirePublishedAt bool) error {
+	if strings.TrimSpace(meta.Title) == "" {
+		return errors.New("title is required")
+	}
+	if meta.Published == nil {
+		return errors.New("published is required")
+	}
+	if requirePublishedAt && strings.TrimSpace(meta.PublishedAt) == "" {
+		return errors.New("published_at is required")
+	}
+	return validateTags(meta.Topics)
+}
+
+func validateTags(tags []string) error {
 	seen := make(map[string]bool)
-	for _, tag := range meta.Tags {
+	for _, tag := range tags {
 		if strings.TrimSpace(tag) == "" || seen[tag] {
 			return errors.New("tags must be non-empty and unique")
 		}
 		seen[tag] = true
 	}
 	return nil
+}
+
+func parseZennPublishedAt(value string) (time.Time, error) {
+	value = strings.TrimSpace(value)
+	location, err := time.LoadLocation("Asia/Tokyo")
+	if err != nil {
+		return time.Time{}, fmt.Errorf("load JST location: %w", err)
+	}
+	for _, layout := range []string{"2006-01-02", "2006-01-02 15:04"} {
+		if parsed, err := time.ParseInLocation(layout, value, location); err == nil {
+			return parsed, nil
+		}
+	}
+	parsed, err := time.Parse(time.RFC3339, value)
+	if err != nil {
+		return time.Time{}, errors.New("published_at must be YYYY-MM-DD, YYYY-MM-DD HH:MM (JST), or RFC3339")
+	}
+	return parsed, nil
+}
+
+func zennSummary(body string) (string, error) {
+	for _, paragraph := range strings.Split(strings.ReplaceAll(body, "\r\n", "\n"), "\n\n") {
+		paragraph = strings.TrimSpace(paragraph)
+		if paragraph == "" || strings.HasPrefix(paragraph, "#") || strings.HasPrefix(paragraph, "```") || strings.HasPrefix(paragraph, ":::") {
+			continue
+		}
+		summary := markdownLinkPattern.ReplaceAllString(paragraph, "$1")
+		summary = strings.NewReplacer("**", "", "__", "", "`", "", "*", "").Replace(summary)
+		summary = strings.Join(strings.Fields(summary), " ")
+		if summary == "" {
+			continue
+		}
+		runes := []rune(summary)
+		if len(runes) > 160 {
+			return string(runes[:157]) + "...", nil
+		}
+		return summary, nil
+	}
+	return "", errors.New("body requires a non-heading paragraph for summary")
 }
 
 func readingMins(body string) int {
