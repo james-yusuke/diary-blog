@@ -1,21 +1,21 @@
-/* Hallmark · Cobalt tokens · cool light / grotesk-sans / electric-blue */
+/* Hallmark · Coral tokens · warm paper / precise sans / restrained coral */
 :root {
   color-scheme: light dark;
-  --color-paper: oklch(98.5% 0.004 250);
-  --color-paper-raised: oklch(96% 0.007 250);
-  --color-paper-strong: oklch(92% 0.011 250);
-  --color-ink: oklch(24% 0.02 258);
-  --color-ink-soft: oklch(34% 0.018 257);
-  --color-muted: oklch(52% 0.016 257);
-  --color-rule: oklch(84% 0.012 252);
-  --color-rule-strong: oklch(68% 0.028 255);
-  --color-accent: oklch(58% 0.2 256);
-  --color-accent-ink: oklch(99% 0.002 250);
-  --color-graphite: oklch(22% 0.016 260);
-  --color-graphite-raised: oklch(27% 0.018 260);
-  --color-graphite-muted: oklch(72% 0.015 255);
-  --color-focus: oklch(58% 0.2 256);
-  --font-display: "Space Grotesk", sans-serif;
+  --color-paper: oklch(98% 0.006 75);
+  --color-paper-raised: oklch(95% 0.01 75);
+  --color-paper-strong: oklch(91% 0.014 72);
+  --color-ink: oklch(24% 0.014 45);
+  --color-ink-soft: oklch(38% 0.014 45);
+  --color-muted: oklch(54% 0.012 48);
+  --color-rule: oklch(84% 0.012 65);
+  --color-rule-strong: oklch(67% 0.022 55);
+  --color-accent: oklch(62% 0.17 32);
+  --color-accent-ink: oklch(99% 0.003 75);
+  --color-graphite: oklch(20% 0.012 45);
+  --color-graphite-raised: oklch(27% 0.014 45);
+  --color-graphite-muted: oklch(73% 0.012 70);
+  --color-focus: oklch(62% 0.17 32);
+  --font-display: "Manrope", sans-serif;
   --font-body: "IBM Plex Sans", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
   --text-xs: 0.6875rem;
@@ -27,7 +27,7 @@
   --text-2xl: 2.4414rem;
   --text-3xl: 3.0518rem;
   --text-4xl: 3.8147rem;
-  --text-display: clamp(2.7rem, 5vw + 0.8rem, 5.2rem);
+  --text-display: clamp(2.5rem, 4vw + 0.8rem, 4.75rem);
   --space-3xs: 0.125rem;
   --space-2xs: 0.25rem;
   --space-xs: 0.5rem;
@@ -38,8 +38,8 @@
   --space-2xl: 4rem;
   --space-3xl: 6rem;
   --space-4xl: 9rem;
-  --radius-control: 0.375rem;
-  --radius-panel: 0.625rem;
+  --radius-control: 999px;
+  --radius-panel: 0.5rem;
   --rule: 1px;
   --dur-micro: 120ms;
   --dur-short: 220ms;
@@ -56,19 +56,19 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-paper: oklch(15% 0.015 258);
-    --color-paper-raised: oklch(19% 0.016 258);
-    --color-paper-strong: oklch(25% 0.018 258);
-    --color-ink: oklch(94% 0.008 250);
-    --color-ink-soft: oklch(86% 0.012 250);
-    --color-muted: oklch(72% 0.014 252);
-    --color-rule: oklch(34% 0.018 258);
-    --color-rule-strong: oklch(55% 0.06 256);
-    --color-accent: oklch(70% 0.16 256);
-    --color-accent-ink: oklch(18% 0.016 258);
-    --color-graphite: oklch(12% 0.013 260);
-    --color-graphite-raised: oklch(19% 0.016 260);
-    --color-graphite-muted: oklch(76% 0.014 250);
-    --color-focus: oklch(70% 0.16 256);
+    --color-paper: oklch(17% 0.012 45);
+    --color-paper-raised: oklch(21% 0.014 45);
+    --color-paper-strong: oklch(27% 0.016 45);
+    --color-ink: oklch(94% 0.006 70);
+    --color-ink-soft: oklch(85% 0.008 70);
+    --color-muted: oklch(70% 0.01 65);
+    --color-rule: oklch(34% 0.015 50);
+    --color-rule-strong: oklch(56% 0.028 42);
+    --color-accent: oklch(73% 0.15 35);
+    --color-accent-ink: oklch(18% 0.012 45);
+    --color-graphite: oklch(11% 0.01 45);
+    --color-graphite-raised: oklch(18% 0.012 45);
+    --color-graphite-muted: oklch(75% 0.01 65);
+    --color-focus: oklch(73% 0.15 35);
   }
 }

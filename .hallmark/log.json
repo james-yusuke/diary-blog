@@ -1,6 +1,14 @@
 [
   {
     "date": "2026-07-27",
+    "macrostructure": "Index-First / Long Document",
+    "theme": "Coral",
+    "enrichment": "none",
+    "brief": "full technical blog redesign for reading recent engineering notes",
+    "scope": "app"
+  },
+  {
+    "date": "2026-07-27",
     "macrostructure": "Ecosystem Index",
     "theme": "Cobalt",
     "enrichment": "none",

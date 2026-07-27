@@ -16,7 +16,7 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 			<title>{ pageTitle }</title>
 			<link rel="preconnect" href="https://fonts.googleapis.com"/>
 			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
-			<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"/>
+			<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet"/>
 			<link rel="stylesheet" href="/assets/site.css"/>
 			<script defer src="/assets/site.js"></script>
 			<script type="module" src="/assets/mermaid.js"></script>
@@ -25,22 +25,21 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 			<a class="skip-link" href="#main">本文へ移動</a>
 			<header class="site-header">
 				<div class="shell nav-shell">
-					<a class="brand" href="/"><span class="brand-mark">./</span>{ site.Title }</a>
+					<a class="brand" href="/">{ site.Title }</a>
 					<nav class="primary-nav" aria-label="主要ナビゲーション">
 						<a href="/">Articles</a>
 						<a href="/?q=CVE">Security</a>
 						<a href="/about">About</a>
 					</nav>
-					<button class="search-pill" type="button" data-command-trigger aria-haspopup="dialog" aria-controls="command-palette" aria-label="記事を検索">
-						<span class="search-pill__icon" aria-hidden="true">⌕</span><span class="search-pill__text">記事を検索</span><span class="search-pill__keys" aria-hidden="true"><kbd>⌘</kbd><kbd>K</kbd></span>
+					<button class="search-trigger" type="button" data-command-trigger aria-haspopup="dialog" aria-controls="command-palette" aria-label="記事を検索">
+						<span aria-hidden="true">⌕</span><span class="search-trigger__label">検索</span><span class="search-trigger__key" aria-hidden="true">⌘K</span>
 					</button>
 				</div>
 			</header>
 			{ children... }
 			<footer class="site-footer">
 				<div class="shell footer-inner">
-					<p class="footer-statement">検証できる知識を、次の判断へ。</p>
-					<div class="footer-meta"><span>{ site.AuthorName } · engineering notes</span><div><a href={ templ.SafeURL(site.GitHubURL) }>GitHub</a><a href={ templ.SafeURL(site.RepositoryURL) }>Repository</a><a href="/feed.xml">RSS</a></div></div>
+					<span>{ site.AuthorName } · engineering notes</span><div><a href={ templ.SafeURL(site.GitHubURL) }>GitHub</a><a href={ templ.SafeURL(site.RepositoryURL) }>Repository</a><a href="/feed.xml">RSS</a></div>
 				</div>
 			</footer>
 			<dialog class="command-palette" id="command-palette" aria-label="記事を検索">
@@ -52,36 +51,26 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 	</html>
 }
 
-templ HomePage(site content.SiteConfig, posts []content.Post, tags []content.Tag, query string) {
+	templ HomePage(site content.SiteConfig, posts []content.Post, tags []content.Tag, query string) {
 	@Layout(site, "diary — "+site.AuthorName) {
 		<main id="main">
-			<section class="hero shell">
-				<div><p class="eyebrow">Engineering index</p><h1>設計と脆弱性の記録。</h1><p class="hero-copy">{ site.Description }</p><div class="author-line"><span class="monogram">JY</span><span>{ site.AuthorName } · Go · Web · CVE · Security</span></div></div>
-				<aside class="hero-query" aria-label="セキュリティ記事を探す"><p><span class="hero-query__method">GET</span> /?q=CVE</p><p>公開された知識を、検索可能な形で。</p><p><a href="/?q=CVE">CVEを検索 →</a></p></aside>
+			<section class="shell index-intro">
+				<h1>{ site.Title }</h1><p>{ site.Description }</p><span>{ site.AuthorName } · Go · Web · Security</span>
 			</section>
-			<section class="shell search-section" aria-label="記事検索">
-				<form action="/" method="get" role="search">
-					<label for="search">記事を検索</label>
-					<div class="search-control"><input id="search" name="q" type="search" value={ query } placeholder="Go、設計、templ…"/><button type="submit">検索</button></div>
-				</form>
-			</section>
-			<section class="shell content-grid">
-				<div>
+			<section class="shell index-layout">
+				<div class="index-main">
 					if query == "" && len(posts) > 0 {
-						<p class="eyebrow">FEATURED NOTE</p>
-						<article class="featured-post">
+						<article class="lead-entry">
 							<p class="post-meta">{ posts[0].DisplayDate() } · { posts[0].ReadingMins } min read</p>
 							<h2><a href={ templ.SafeURL(posts[0].URL()) }>{ posts[0].Title }</a></h2>
 							<p>{ posts[0].Summary }</p>
-							<a class="text-link" href={ templ.SafeURL(posts[0].URL()) }>続きを読む <span aria-hidden="true">→</span></a>
+							<a class="text-link" href={ templ.SafeURL(posts[0].URL()) }>続きを読む →</a>
 						</article>
 					}
-					<div class="section-heading">
+					<div class="stream-heading">
 						if query != "" {
-							<p class="eyebrow">SEARCH RESULTS</p>
-							<h2>「{ query }」に一致した記事</h2>
+							<h2>「{ query }」の検索結果</h2>
 						} else {
-							<p class="eyebrow">LATEST NOTES</p>
 							<h2>最新の記事</h2>
 						}
 					</div>
@@ -98,8 +87,7 @@ templ HomePage(site content.SiteConfig, posts []content.Post, tags []content.Tag
 					}
 				</div>
 				<aside class="topic-panel" aria-label="タグ一覧">
-					<p class="eyebrow">TOPICS</p>
-					<h2>読むテーマ</h2>
+					<h2>Topics</h2>
 					<div class="tag-list">
 						for _, tag := range tags {
 							<a href={ templ.SafeURL("/tags/" + url.PathEscape(tag.Name)) }>{ tag.Name } <span>{ tag.Count }</span></a>
@@ -130,23 +118,22 @@ templ PostCard(post content.Post) {
 templ PostPage(site content.SiteConfig, post content.Post, related []content.Post) {
 	@Layout(site, post.Title+" — "+site.Title) {
 		<main id="main" class="article-shell shell">
-			<a class="back-link" href="/">← すべての記事</a>
+			<a class="back-link" href="/">← 記事一覧</a>
 			<article class="article">
 				<header class="article-header">
-					<p class="eyebrow">
+					<p class="article-tags">
 						for _, tag := range post.Tags {
 							<span>{ tag } </span>
 						}
 					</p>
 					<h1>{ post.Title }</h1>
 					<p class="article-summary">{ post.Summary }</p>
-					<div class="article-byline"><span class="monogram">JY</span><span>{ post.DisplayDate() } · { post.ReadingMins } min read<br/>by { site.AuthorName }</span></div>
+					<div class="article-byline"><span>{ post.DisplayDate() } · { post.ReadingMins } min read</span><span>by { site.AuthorName }</span></div>
 				</header>
 				<div class="prose">@templ.Raw(string(post.HTML))</div>
 			</article>
 			if len(related) > 0 {
 				<section class="related">
-					<p class="eyebrow">RELATED NOTES</p>
 					<h2>あわせて読みたい</h2>
 					<div class="post-list">
 						for _, candidate := range related {
@@ -162,16 +149,14 @@ templ PostPage(site content.SiteConfig, post content.Post, related []content.Pos
 templ TagPage(site content.SiteConfig, tag string, posts []content.Post, tags []content.Tag) {
 	@Layout(site, tag+" — "+site.Title) {
 		<main id="main" class="shell archive">
-			<p class="eyebrow">TOPIC ARCHIVE</p>
-			<h1>{ tag }</h1>
-			<p class="archive-intro">{ len(posts) }本の記事</p>
+			<header class="archive-header"><a class="back-link" href="/">← 記事一覧</a><h1>{ tag }</h1><p class="archive-intro">{ len(posts) }本の記事</p></header>
 			<div class="post-list">
 				for _, post := range posts {
 					@PostCard(post)
 				}
 			</div>
 			<aside class="archive-tags">
-				<p class="eyebrow">OTHER TOPICS</p>
+				<h2>ほかのテーマ</h2>
 				<div class="tag-list">
 					for _, item := range tags {
 						<a href={ templ.SafeURL("/tags/" + url.PathEscape(item.Name)) }>{ item.Name } <span>{ item.Count }</span></a>
@@ -185,11 +170,10 @@ templ TagPage(site content.SiteConfig, tag string, posts []content.Post, tags []
 templ AboutPage(site content.SiteConfig) {
 	@Layout(site, "About — "+site.Title) {
 		<main id="main" class="shell about">
-			<p class="eyebrow">ABOUT DIARY</p>
-			<h1>自己紹介&連絡先</h1>
+			<h1>自己紹介と連絡先</h1>
 			<div class="about-grid">
 				<div><p class="about-lead">{ site.Bio }</p><p>diary は、GoやWeb開発を中心に、設計の判断や手を動かして得た学びを記録する個人ブログです。完成形だけでなく、迷った理由も残します。</p></div>
-				<aside><p class="eyebrow">WRITTEN BY</p><h2>{ site.AuthorName }</h2><a class="text-link" href={ templ.SafeURL(site.GitHubURL) }>GitHubを見る →</a><p class="repo-note">記事は <a href={ templ.SafeURL(site.RepositoryURL) }>GitHubリポジトリ</a> のMarkdownで管理しています。</p></aside>
+				<aside><h2>{ site.AuthorName }</h2><a class="text-link" href={ templ.SafeURL(site.GitHubURL) }>GitHubを見る →</a><p class="repo-note">記事は <a href={ templ.SafeURL(site.RepositoryURL) }>GitHubリポジトリ</a> のMarkdownで管理しています。</p></aside>
 			</div>
 		</main>
 	}
@@ -197,6 +181,6 @@ templ AboutPage(site content.SiteConfig) {
 
 templ NotFoundPage(site content.SiteConfig) {
 	@Layout(site, "Not found — "+site.Title) {
-		<main id="main" class="shell not-found"><p class="eyebrow">404</p><h1>そのページは<br/>見つかりませんでした。</h1><p>URLを確認するか、記事一覧に戻ってください。</p><a class="button-link" href="/">記事一覧へ戻る</a></main>
+			<main id="main" class="shell not-found"><p class="post-meta">404</p><h1>そのページは見つかりませんでした。</h1><p>URLを確認するか、記事一覧に戻ってください。</p><a class="text-link" href="/">記事一覧へ戻る →</a></main>
 	}
 }
