@@ -48,9 +48,9 @@ git clone git@github.com:james-yusuke/zenn.git content/zenn
 
 `content/zenn/articles` 配下の Markdown は、Zenn の front matter として読み込みます。ファイル名が diary 上の slug、`topics` がタグ、本文先頭段落が一覧・RSS用の概要になります。`published: false` は非公開で、公開する記事では `published_at` が必須です。日時が未来の場合は指定時刻まで diary でも公開されません。
 
-GitHub Actions の **Sync Zenn content** が15分ごとに、Zenn の `main` を取得してWorker用スナップショットを再生成します。差分があれば diary 側へ自動コミット・pushされるため、通常は diary 側での操作は不要です。急いで反映したい場合は Actions 画面から **Sync Zenn content** を手動実行できます。Worker はこのコミット済みスナップショットを使うため、Cloudflare のビルド環境が private リポジトリへアクセスする必要はありません。公開済みの Worker に private リポジトリの鍵は含まれません。
+Zenn の `main` で `articles/**` が更新されると、Zenn 側の **Notify diary** workflow が diary の **Sync Zenn content** workflow を即時起動します。通知に含まれるコミットSHAを取得してWorker用スナップショットを再生成し、差分があれば diary 側へ自動コミット・pushします。取りこぼし対策として日次の同期も行います。Worker はこのコミット済みスナップショットを使うため、Cloudflare のビルド環境が private リポジトリへアクセスする必要はありません。公開済みの Worker に private リポジトリの鍵は含まれません。
 
-GitHub Actions では、fine-grained personal access token を発行し、対象リポジトリを `james-yusuke/zenn` のみに絞り、Repository permissions の **Contents: Read-only** だけを許可します。token は diary リポジトリの `ZENN_REPO_TOKEN` Actions Secret に登録します。fork からの pull request では token を使わず、fixture ベースの検証だけが実行されます。同期ワークフローが diary 側の生成済みファイルをpushするため、diary リポジトリの Actions workflow permissions は **Read and write permissions** を許可してください。
+GitHub Actions では、fine-grained personal access token を発行し、対象リポジトリを `james-yusuke/zenn` のみに絞り、Repository permissions の **Contents: Read-only** だけを許可します。token は diary リポジトリの `ZENN_REPO_TOKEN` Actions Secret に登録します。Zenn 側には、diary リポジトリだけに **Actions: Read and write** を許可した別のtokenを `DIARY_WORKFLOW_TOKEN` として登録します。fork からの pull request では token を使わず、fixture ベースの検証だけが実行されます。同期ワークフローが diary 側の生成済みファイルをpushするため、diary リポジトリの Actions workflow permissions は **Read and write permissions** を許可してください。
 
 Cloudflare の Build command には次を設定します。
 

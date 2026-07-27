@@ -1,18 +1,22 @@
 name: Sync Zenn content
 
 on:
-  # GitHub Actions の schedule は厳密な時刻実行を保証しないため、混雑しやすい
-  # 毎時ちょうどを避けて15分ごとに同期する。必要なら Actions 画面から手動実行もできる。
-  schedule:
-    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
+    inputs:
+      zenn_sha:
+        description: "Zenn の同期対象コミットSHA（空なら main の最新）"
+        required: false
+        type: string
+  # 通知失敗時の保険。通常の同期は Zenn の push 通知で即時に実行される。
+  schedule:
+    - cron: "23 3 * * *"
 
 permissions:
   contents: write
 
 concurrency:
   group: sync-zenn-content
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   sync:
@@ -26,15 +30,37 @@ jobs:
         with:
           go-version: "1.23.x"
 
-      - name: Clone latest private Zenn content
+      - name: Clone requested private Zenn revision
         env:
           ZENN_REPO_TOKEN: ${{ secrets.ZENN_REPO_TOKEN }}
+          ZENN_SHA: ${{ github.event.inputs.zenn_sha || '' }}
         run: |
           if [ -z "$ZENN_REPO_TOKEN" ]; then
             echo "ZENN_REPO_TOKEN must be configured to sync private Zenn content." >&2
             exit 1
           fi
-          git clone --depth=1 "https://x-access-token:${ZENN_REPO_TOKEN}@github.com/james-yusuke/zenn.git" content/zenn
+
+          repo_url="https://x-access-token:${ZENN_REPO_TOKEN}@github.com/james-yusuke/zenn.git"
+          if [ -z "$ZENN_SHA" ]; then
+            git clone --depth=1 "$repo_url" content/zenn
+            exit 0
+          fi
+
+          if ! printf '%s' "$ZENN_SHA" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "zenn_sha must be a full lowercase Git commit SHA." >&2
+            exit 1
+          fi
+
+          git init content/zenn
+          git -C content/zenn remote add origin "$repo_url"
+          git -C content/zenn fetch --depth=1 origin "$ZENN_SHA"
+          git -C content/zenn checkout --detach FETCH_HEAD
+
+          actual_sha="$(git -C content/zenn rev-parse HEAD)"
+          if [ "$actual_sha" != "$ZENN_SHA" ]; then
+            echo "Fetched Zenn revision does not match requested SHA." >&2
+            exit 1
+          fi
 
       - name: Generate Worker content snapshot
         run: go run ./cmd/workergen
