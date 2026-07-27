@@ -2,6 +2,13 @@
 
 package site
 
-import "github.com/james-yusuke/diary-blog/internal/content"
+import (
+	"syscall/js"
 
-func NewWorker() *App { return &App{store: content.LoadEmbedded()} }
+	"github.com/james-yusuke/diary-blog/internal/content"
+)
+
+func NewWorker() *App {
+	now := timeFromUnixMilliseconds(js.Global().Get("Date").Call("now").Float())
+	return &App{store: content.LoadEmbeddedAt(now)}
+}
