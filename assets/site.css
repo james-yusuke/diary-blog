@@ -77,6 +77,8 @@ button:hover, .button-link:hover { background: var(--accent); color: white; }
 .prose pre { overflow-x: auto; padding: 1.25rem; background: #262b28; color: #f5f0e8; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .82rem; line-height: 1.65; }
 .prose code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .86em; }
 .prose :not(pre) > code { padding: .12em .3em; background: var(--paper-deep); }
+.prose .mermaid { overflow-x: auto; margin: 2rem 0; padding: 1rem; border: 1px solid var(--line); background: var(--card); }
+.prose .mermaid svg { display: block; max-width: 100%; height: auto; margin: auto; }
 .prose table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; font-family: var(--sans); font-size: .88rem; }
 .prose th, .prose td { padding: .5rem .75rem; border: 1px solid var(--line); text-align: left; }
 .related { margin-top: 5rem; padding-top: 2rem; border-top: 1px solid var(--line); }

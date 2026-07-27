@@ -29,6 +29,15 @@ make run
 
 記事の一覧、タグ、検索、RSSはfront matterから自動で組み立てられます。不正なメタデータやslugの重複は起動時にエラーになります。
 
+Mermaid図は、通常のコードフェンスに `mermaid` を指定して書けます。記事ページではSVG図として描画され、図の描画に失敗したときはコードのまま表示されます。
+
+````markdown
+```mermaid
+flowchart LR
+  A["入力"] --> B["処理"] --> C["出力"]
+```
+````
+
 ## Zenn記事の取り込み
 
 private な [`james-yusuke/zenn`](https://github.com/james-yusuke/zenn) は、Git追跡対象外の `content/zenn` に clone して取り込みます。Cloudflare Workers Builds が private submodule を取得できないため、submodule では管理しません。ローカルでは GitHub へアクセスできる状態で次を実行してください。

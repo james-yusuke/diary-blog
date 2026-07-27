@@ -40,6 +40,7 @@ func TestRoutesRenderExpectedPages(t *testing.T) {
 		{"/posts/hello-templ", "A useful body"},
 		{"/tags/Go", "TOPIC ARCHIVE"},
 		{"/about", "James Yusuke"},
+		{"/posts/hello-templ", "/assets/mermaid.js"},
 	} {
 		req := httptest.NewRequest(http.MethodGet, tc.path, nil)
 		rec := httptest.NewRecorder()
