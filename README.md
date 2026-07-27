@@ -31,17 +31,25 @@ make run
 
 ## Zenn記事の取り込み
 
-private な [`james-yusuke/zenn`](https://github.com/james-yusuke/zenn) は `content/zenn` の Git submodule として管理します。submodule は親リポジトリと同じ認証方式を使うため、clone 後と Zenn の参照コミット更新後には GitHub へアクセスできる状態で次を実行してください。
+private な [`james-yusuke/zenn`](https://github.com/james-yusuke/zenn) は、Git追跡対象外の `content/zenn` に clone して取り込みます。Cloudflare Workers Builds が private submodule を取得できないため、submodule では管理しません。ローカルでは GitHub へアクセスできる状態で次を実行してください。
 
 ```sh
-git submodule update --init --recursive
+git clone git@github.com:james-yusuke/zenn.git content/zenn
 ```
 
 `content/zenn/articles` 配下の Markdown は、Zenn の front matter として読み込みます。ファイル名が diary 上の slug、`topics` がタグ、本文先頭段落が一覧・RSS用の概要になります。`published: false` は非公開で、公開する記事では `published_at` が必須です。日時が未来の場合は指定時刻まで diary でも公開されません。
 
-Zenn リポジトリの更新を反映するには、submodule を更新し、diary 側の参照コミットをコミットしてください。Worker はビルド時に記事を埋め込むため、公開済みの Worker に private リポジトリの鍵は含まれません。
+Zenn リポジトリの更新を反映するには、`content/zenn` で pull してから diary を再ビルドします。Cloudflare とGitHub Actionsはビルド時に Zenn リポジトリを clone します。Worker はビルド時に記事を埋め込むため、公開済みの Worker に private リポジトリの鍵は含まれません。
 
 GitHub Actions では、fine-grained personal access token を発行し、対象リポジトリを `james-yusuke/zenn` のみに絞り、Repository permissions の **Contents: Read-only** だけを許可します。token は diary リポジトリの `ZENN_REPO_TOKEN` Actions Secret に登録します。fork からの pull request では token を使わず、fixture ベースの検証だけが実行されます。
+
+Cloudflare Workers Builds でも同じ名前の `ZENN_REPO_TOKEN` を Build Secret として登録し、ビルドコマンドで Zenn を clone します。
+
+Cloudflare の Build command には次を設定します。
+
+```sh
+git clone --depth=1 "https://x-access-token:${ZENN_REPO_TOKEN}@github.com/james-yusuke/zenn.git" content/zenn && mkdir -p "$HOME/.local" && curl -fsSL https://github.com/tinygo-org/tinygo/releases/download/v0.38.0/tinygo0.38.0.linux-amd64.tar.gz | tar -xz -C "$HOME/.local" && TINYGO="$HOME/.local/tinygo/bin/tinygo" make worker-build
+```
 
 ## 検証
 
