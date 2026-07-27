@@ -162,7 +162,7 @@ func HomePage(site content.SiteConfig, posts []content.Post, tags []content.Tag,
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<main id=\"main\"><section class=\"hero shell\"><p class=\"eyebrow\">PERSONAL ENGINEERING JOURNAL</p><h1>技術を、<br>自分のことばで残す。</h1><p class=\"hero-copy\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<main id=\"main\"><section class=\"hero shell\"><p class=\"eyebrow\">PERSONAL ENGINEERING JOURNAL</p><h1>james yusuke<br>個人ブログ</h1><p class=\"hero-copy\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
