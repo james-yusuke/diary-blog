@@ -1,0 +1,52 @@
+name: Sync Zenn content
+
+on:
+  # GitHub Actions の schedule は厳密な時刻実行を保証しないため、混雑しやすい
+  # 毎時ちょうどを避けて15分ごとに同期する。必要なら Actions 画面から手動実行もできる。
+  schedule:
+    - cron: "7,22,37,52 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-zenn-content
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.23.x"
+
+      - name: Clone latest private Zenn content
+        env:
+          ZENN_REPO_TOKEN: ${{ secrets.ZENN_REPO_TOKEN }}
+        run: |
+          if [ -z "$ZENN_REPO_TOKEN" ]; then
+            echo "ZENN_REPO_TOKEN must be configured to sync private Zenn content." >&2
+            exit 1
+          fi
+          git clone --depth=1 "https://x-access-token:${ZENN_REPO_TOKEN}@github.com/james-yusuke/zenn.git" content/zenn
+
+      - name: Generate Worker content snapshot
+        run: go run ./cmd/workergen
+
+      - name: Commit updated Zenn snapshot
+        run: |
+          if git diff --quiet -- internal/content/embedded_tinygo_gen.go; then
+            echo "Zenn content is already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add internal/content/embedded_tinygo_gen.go
+          git commit -m "chore: sync Zenn content"
+          git push
