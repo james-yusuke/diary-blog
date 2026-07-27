@@ -17,7 +17,9 @@ func TestGenerateEmbedsDiaryAndZennContent(t *testing.T) {
 	files := map[string]string{
 		"config/site.yaml":                   "title: diary\nauthor_name: James\ndescription: test\n",
 		"assets/site.css":                    "body {}",
+		"assets/tokens.css":                  ":root {}",
 		"assets/mermaid.js":                  "export default {};",
+		"assets/site.js":                     "export default {};",
 		"content/posts/diary.md":             "---\nslug: diary-post\ntitle: Diary\nsummary: Summary\npublished_at: 2026-01-01\ntags:\n  - Go\n---\n\nDiary body.",
 		"content/zenn/articles/zenn_post.md": "---\ntitle: Zenn\ntopics:\n  - Zenn\npublished: true\npublished_at: \"2999-01-02 09:00\"\n---\n\nZenn body.",
 	}
@@ -43,7 +45,9 @@ func TestGenerateEmbedsDiaryAndZennContent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(assets), `workerMermaidJS`) {
+	for _, fragment := range []string{`workerTokensCSS`, `workerMermaidJS`, `workerSiteJS`} {
+		if !strings.Contains(string(assets), fragment) {
 		t.Fatalf("generated Worker assets do not include Mermaid JavaScript: %s", assets)
+		}
 	}
 }

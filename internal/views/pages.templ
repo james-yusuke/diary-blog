@@ -14,28 +14,40 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<meta name="description" content={ site.Description }/>
 			<title>{ pageTitle }</title>
+			<link rel="preconnect" href="https://fonts.googleapis.com"/>
+			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+			<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet"/>
 			<link rel="stylesheet" href="/assets/site.css"/>
+			<script defer src="/assets/site.js"></script>
 			<script type="module" src="/assets/mermaid.js"></script>
 		</head>
 		<body>
 			<a class="skip-link" href="#main">本文へ移動</a>
 			<header class="site-header">
 				<div class="shell nav-shell">
-					<a class="brand" href="/">{ site.Title }</a>
-					<nav aria-label="主要ナビゲーション">
+					<a class="brand" href="/"><span class="brand-mark">./</span>{ site.Title }</a>
+					<nav class="primary-nav" aria-label="主要ナビゲーション">
 						<a href="/">Articles</a>
+						<a href="/?q=CVE">Security</a>
 						<a href="/about">About</a>
-						<a href="/feed.xml">RSS</a>
 					</nav>
+					<button class="search-pill" type="button" data-command-trigger aria-haspopup="dialog" aria-controls="command-palette" aria-label="記事を検索">
+						<span class="search-pill__icon" aria-hidden="true">⌕</span><span class="search-pill__text">記事を検索</span><span class="search-pill__keys" aria-hidden="true"><kbd>⌘</kbd><kbd>K</kbd></span>
+					</button>
 				</div>
 			</header>
 			{ children... }
 			<footer class="site-footer">
 				<div class="shell footer-inner">
-					<p><strong>{ site.AuthorName }</strong> が書く技術の記録。</p>
-					<div><a href={ templ.SafeURL(site.GitHubURL) }>GitHub</a><span aria-hidden="true"> · </span><a href={ templ.SafeURL(site.RepositoryURL) }>Repository</a></div>
+					<p class="footer-statement">検証できる知識を、次の判断へ。</p>
+					<div class="footer-meta"><span>{ site.AuthorName } · engineering notes</span><div><a href={ templ.SafeURL(site.GitHubURL) }>GitHub</a><a href={ templ.SafeURL(site.RepositoryURL) }>Repository</a><a href="/feed.xml">RSS</a></div></div>
 				</div>
 			</footer>
+			<dialog class="command-palette" id="command-palette" aria-label="記事を検索">
+				<div class="command-head"><form action="/" method="get"><input class="command-input" id="command-query" name="q" type="search" placeholder="記事・CVE・タグを検索" autocomplete="off"/></form><button class="command-close" type="button" data-command-close aria-label="検索を閉じる">Esc</button></div>
+				<div class="command-results" role="listbox" aria-label="検索候補"><p class="command-group">Navigate</p><a class="command-item" data-command-item aria-selected="true" role="option" href="/"><span>すべての記事</span><span class="command-hint">/</span></a><a class="command-item" data-command-item aria-selected="false" role="option" href="/?q=CVE"><span>CVE・セキュリティを検索</span><span class="command-hint">CVE</span></a><a class="command-item" data-command-item aria-selected="false" role="option" href="/about"><span>About</span><span class="command-hint">info</span></a><a class="command-item" data-command-item aria-selected="false" role="option" href="/feed.xml"><span>RSS feed</span><span class="command-hint">xml</span></a></div>
+				<div class="command-foot"><span>↑ ↓ 移動</span><span>↵ 開く</span><span>Esc 閉じる</span></div>
+			</dialog>
 		</body>
 	</html>
 }
@@ -44,10 +56,8 @@ templ HomePage(site content.SiteConfig, posts []content.Post, tags []content.Tag
 	@Layout(site, "diary — "+site.AuthorName) {
 		<main id="main">
 			<section class="hero shell">
-				<p class="eyebrow">PERSONAL ENGINEERING JOURNAL</p>
-				<h1>james yusuke<br/>個人ブログ</h1>
-				<p class="hero-copy">{ site.Description }</p>
-				<div class="author-line"><span class="monogram">JY</span><span>Written by { site.AuthorName }</span></div>
+				<div><p class="eyebrow">Engineering index</p><h1>設計と脆弱性の記録。</h1><p class="hero-copy">{ site.Description }</p><div class="author-line"><span class="monogram">JY</span><span>{ site.AuthorName } · Go · Web · CVE · Security</span></div></div>
+				<aside class="hero-query" aria-label="セキュリティ記事を探す"><p><span class="hero-query__method">GET</span> /?q=CVE</p><p>公開された知識を、検索可能な形で。</p><p><a href="/?q=CVE">CVEを検索 →</a></p></aside>
 			</section>
 			<section class="shell search-section" aria-label="記事検索">
 				<form action="/" method="get" role="search">
