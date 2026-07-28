@@ -64,7 +64,8 @@ func writeContent(path string, store *content.Store) error {
 	fmt.Fprintf(&b, "var embeddedSite = SiteConfig{Title: %q, AuthorName: %q, Description: %q, Bio: %q, GitHubURL: %q, RepositoryURL: %q, BaseURL: %q}\n\n", store.Site.Title, store.Site.AuthorName, store.Site.Description, store.Site.Bio, store.Site.GitHubURL, store.Site.RepositoryURL, store.Site.BaseURL)
 	b.WriteString("var embeddedPosts = []Post{\n")
 	for _, post := range store.Posts {
-		zoneName, offset := post.Published.Zone()
+		_, offset := post.Published.Zone()
+		zoneName := canonicalZoneName(offset)
 		fmt.Fprintf(&b, "{Source: %q, Slug: %q, Title: %q, Summary: %q, Published: time.Date(%d, time.Month(%d), %d, %d, %d, %d, %d, time.FixedZone(%q, %d)), Tags: []string{%s}, Body: %q, HTML: %q, ReadingMins: %d},\n", post.Source, post.Slug, post.Title, post.Summary, post.Published.Year(), post.Published.Month(), post.Published.Day(), post.Published.Hour(), post.Published.Minute(), post.Published.Second(), post.Published.Nanosecond(), zoneName, offset, quotedStrings(post.Tags), post.Body, post.HTML, post.ReadingMins)
 	}
 	b.WriteString("}\n")
@@ -82,6 +83,22 @@ func quotedStrings(values []string) string {
 		quoted = append(quoted, fmt.Sprintf("%q", value))
 	}
 	return strings.Join(quoted, ", ")
+}
+
+// canonicalZoneName deliberately does not use time.Time.Zone's name. Go maps a
+// numeric RFC3339 offset to time.Local when it matches the host's local zone;
+// that made generated Worker content differ between a JST workstation and a
+// UTC GitHub Actions runner despite representing the same instant.
+func canonicalZoneName(offset int) string {
+	if offset == 0 {
+		return "UTC"
+	}
+	sign := "+"
+	if offset < 0 {
+		sign = "-"
+		offset = -offset
+	}
+	return fmt.Sprintf("UTC%s%02d:%02d", sign, offset/3600, offset%3600/60)
 }
 
 func writeFormatted(path string, source []byte) error {
