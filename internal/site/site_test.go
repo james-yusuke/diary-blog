@@ -45,6 +45,7 @@ func TestRoutesRenderExpectedPages(t *testing.T) {
 	app := testApp(t)
 	for _, tc := range []struct{ path, contains string }{
 		{"/", "Hello templ"},
+		{"/", "https://avatars.githubusercontent.com/u/238946603?v=4"},
 		{"/", "独自記事"},
 		{"/", "Zenn"},
 		{"/?q=components", "検索結果"},
