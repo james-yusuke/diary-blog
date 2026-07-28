@@ -28,6 +28,9 @@ jobs:
       - uses: actions/setup-go@v6
         with:
           go-version: "1.23.x"
+      - name: Audit Zenn article coverage
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        run: go run ./cmd/zenncheck
       - name: Generate templ components
         run: go run github.com/a-h/templ/cmd/templ@v0.3.1001 generate
       - name: Test

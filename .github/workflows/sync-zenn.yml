@@ -62,6 +62,9 @@ jobs:
             exit 1
           fi
 
+      - name: Audit Zenn article coverage
+        run: go run ./cmd/zenncheck
+
       - name: Generate Worker content snapshot
         run: go run ./cmd/workergen
 

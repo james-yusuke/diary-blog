@@ -1,12 +1,15 @@
 GO ?= go
 TINYGO ?= tinygo
 
-.PHONY: generate worker-generate worker-release-build run test build worker-build
+.PHONY: generate zenn-check worker-generate worker-release-build run test build worker-build
 
 generate:
 	$(GO) run github.com/a-h/templ/cmd/templ@v0.3.1001 generate
 
-worker-generate: generate
+zenn-check:
+	$(GO) run ./cmd/zenncheck
+
+worker-generate: generate zenn-check
 	$(GO) run ./cmd/workergen
 
 # Regenerate the checked-in Worker content snapshot, then build it. Use this

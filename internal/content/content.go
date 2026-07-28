@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -41,6 +42,24 @@ type zennMeta struct {
 	PublishedAt string   `yaml:"published_at"`
 }
 
+type ZennArticleState string
+
+const (
+	ZennArticlePublic    ZennArticleState = "public"
+	ZennArticleScheduled ZennArticleState = "scheduled"
+	ZennArticleDraft     ZennArticleState = "draft"
+)
+
+// ZennArticleAudit describes how one Markdown article under zenn/articles is
+// expected to be handled by the diary. It is deliberately based on the same
+// parser used by LoadAll so the CI report cannot disagree with the build.
+type ZennArticleAudit struct {
+	Slug      string
+	Path      string
+	State     ZennArticleState
+	Published time.Time
+}
+
 // Load reads diary posts from contentDir. Markdown below zenn/articles uses
 // Zenn's front matter; all other Markdown uses diary's front matter.
 func Load(configPath, contentDir string) (*Store, error) {
@@ -59,6 +78,51 @@ func LoadAll(configPath, contentDir string) (*Store, error) {
 		return nil, err
 	}
 	return newStore(site, posts), nil
+}
+
+// AuditZenn classifies every Zenn article. A draft is intentionally absent
+// from the Worker snapshot; published and scheduled articles must be present
+// in it so they can become visible without another deployment.
+func AuditZenn(contentDir string, now time.Time) ([]ZennArticleAudit, error) {
+	articlesRoot := filepath.Join(contentDir, "zenn", "articles")
+	if _, err := os.Stat(articlesRoot); errors.Is(err, os.ErrNotExist) {
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf("read Zenn articles: %w", err)
+	}
+
+	var audit []ZennArticleAudit
+	err := filepath.WalkDir(articlesRoot, func(path string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.IsDir() || filepath.Ext(entry.Name()) != ".md" {
+			return nil
+		}
+		post, draft, err := parseZennPost(path)
+		if err != nil {
+			return err
+		}
+		slug := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+		entryAudit := ZennArticleAudit{Slug: slug, Path: path}
+		if draft {
+			entryAudit.State = ZennArticleDraft
+		} else {
+			entryAudit.Published = post.Published
+			if post.Published.After(now) {
+				entryAudit.State = ZennArticleScheduled
+			} else {
+				entryAudit.State = ZennArticlePublic
+			}
+		}
+		audit = append(audit, entryAudit)
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("audit Zenn content: %w", err)
+	}
+	sort.Slice(audit, func(i, j int) bool { return audit[i].Slug < audit[j].Slug })
+	return audit, nil
 }
 
 func loadSiteAndPosts(configPath, contentDir string) (SiteConfig, []Post, error) {
