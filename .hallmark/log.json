@@ -1,5 +1,13 @@
 [
-  {
+	{
+		"date": "2026-07-28",
+		"macrostructure": "Index-First / Long Document",
+		"theme": "Coral",
+		"enrichment": "none",
+		"brief": "separate original technical notes and Zenn articles throughout the blog",
+		"scope": "app refinement"
+	},
+	{
     "date": "2026-07-27",
     "macrostructure": "Index-First / Long Document",
     "theme": "Coral",

@@ -34,6 +34,10 @@ h1, h2, h3 { min-width: 0; font-family: var(--font-display); font-style: normal;
 .index-intro p { max-width: 52ch; margin: var(--space-sm) 0 0; color: var(--color-ink-soft); font-size: var(--text-md); }
 .index-intro span, .post-meta, .article-tags, .article-byline, .archive-intro { color: var(--color-muted); font-family: var(--font-mono); font-size: var(--text-xs); font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
 .index-intro span { display: block; margin-top: var(--space-lg); }
+.source-legend { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-md) !important; font-family: var(--font-mono); font-size: var(--text-xs) !important; }
+.source-legend span, .source-label { display: inline-flex; align-items: center; margin: 0; color: var(--color-muted); font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.02em; }
+.source-legend span::before, .source-label::before { width: var(--space-xs); height: var(--space-xs); margin-right: var(--space-2xs); border-radius: 999px; background: var(--color-ink-soft); content: ""; }
+.source-legend [data-source="zenn"]::before, .source-label[data-source="zenn"]::before { background: var(--color-accent); }
 .index-layout { display: grid; gap: var(--space-2xl); padding-block: var(--space-2xl) var(--space-4xl); }
 .index-main { min-width: 0; }
 .lead-entry { padding-bottom: var(--space-2xl); border-bottom: var(--rule) solid var(--color-rule-strong); }
@@ -66,6 +70,7 @@ h1, h2, h3 { min-width: 0; font-family: var(--font-display); font-style: normal;
 .back-link:hover { color: var(--color-accent); }
 .article { margin-top: var(--space-2xl); }
 .article-header { padding-bottom: var(--space-2xl); border-bottom: var(--rule) solid var(--color-rule-strong); }
+.article-source { margin: 0 0 var(--space-sm); }
 .article-tags { margin: 0 0 var(--space-sm); }
 .article-header h1 { margin: 0; font-size: clamp(var(--text-2xl), 5vw, var(--text-4xl)); font-weight: 700; }
 .article-summary { max-width: 55ch; margin: var(--space-lg) 0 0; color: var(--color-ink-soft); font-size: var(--text-md); }

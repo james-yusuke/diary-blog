@@ -56,6 +56,7 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 		<main id="main">
 			<section class="shell index-intro">
 				<h1>{ site.Title }</h1><p>{ site.Description }</p><span>{ site.AuthorName } · Go · Web · Security</span>
+				<p class="source-legend" aria-label="記事ソース"><span data-source="diary">独自記事</span><span data-source="zenn">Zenn</span></p>
 			</section>
 			<section class="shell index-layout">
 				<div class="index-main">
@@ -101,7 +102,7 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 
 templ PostCard(post content.Post) {
 	<article class="post-card">
-		<p class="post-meta">{ post.DisplayDate() } · { post.ReadingMins } min read</p>
+		<p class="post-meta"><span class="source-label" data-source={ post.Source }>{ post.SourceLabel() }</span> { post.DisplayDate() } · { post.ReadingMins } min read</p>
 		<h3><a href={ templ.SafeURL(post.URL()) }>{ post.Title }</a></h3>
 		<p>{ post.Summary }</p>
 		<div class="post-card-bottom">
@@ -121,6 +122,7 @@ templ PostPage(site content.SiteConfig, post content.Post, related []content.Pos
 			<a class="back-link" href="/">← 記事一覧</a>
 			<article class="article">
 				<header class="article-header">
+					<p class="article-source"><span class="source-label" data-source={ post.Source }>{ post.SourceLabel() }</span></p>
 					<p class="article-tags">
 						for _, tag := range post.Tags {
 							<span>{ tag } </span>

@@ -94,7 +94,7 @@ func (a *App) feed(w http.ResponseWriter, r *http.Request) {
 	}
 	items := make([]rssItem, 0, len(a.store.Posts))
 	for _, post := range a.store.Posts {
-		items = append(items, rssItem{Title: post.Title, Link: baseURL + post.URL(), GUID: baseURL + post.URL(), Description: post.Summary, PubDate: post.Published.Format(time.RFC1123Z)})
+		items = append(items, rssItem{Title: post.Title, Link: baseURL + post.URL(), GUID: baseURL + post.URL(), Description: post.Summary, Category: post.SourceLabel(), PubDate: post.Published.Format(time.RFC1123Z)})
 	}
 	feed := rss{Version: "2.0", Channel: rssChannel{Title: a.store.Site.Title, Link: baseURL, Description: a.store.Site.Description, Items: items}}
 	w.Header().Set("Content-Type", "application/rss+xml; charset=utf-8")
@@ -132,5 +132,6 @@ type rssItem struct {
 	Link        string `xml:"link"`
 	GUID        string `xml:"guid"`
 	Description string `xml:"description"`
+	Category    string `xml:"category"`
 	PubDate     string `xml:"pubDate"`
 }

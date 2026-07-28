@@ -141,7 +141,7 @@ func parsePost(path string) (Post, bool, error) {
 		return Post{}, false, fmt.Errorf("validate post %s: %w", path, err)
 	}
 	post, err := renderPost(meta.Slug, meta.Title, meta.Summary, meta.Published, meta.Tags, body)
-	post.Source = "diary"
+	post.Source = SourceDiary
 	return post, meta.Draft, err
 }
 

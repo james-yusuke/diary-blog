@@ -45,9 +45,13 @@ func TestRoutesRenderExpectedPages(t *testing.T) {
 	app := testApp(t)
 	for _, tc := range []struct{ path, contains string }{
 		{"/", "Hello templ"},
+		{"/", "独自記事"},
+		{"/", "Zenn"},
 		{"/?q=components", "検索結果"},
 		{"/posts/hello-templ", "A useful body"},
+		{"/posts/hello-templ", "独自記事"},
 		{"/posts/zenn/zenn-note", "A Zenn body"},
+		{"/posts/zenn/zenn-note", "Zenn"},
 		{"/tags/Go", "ほかのテーマ"},
 		{"/about", "James Yusuke"},
 		{"/posts/hello-templ", "/assets/mermaid.js"},
@@ -83,6 +87,9 @@ func TestNotFoundAndRSS(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), "/posts/zenn/zenn-note") {
 		t.Fatalf("RSS does not use the Zenn URL: %s", rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "<category>独自記事</category>") || !strings.Contains(rec.Body.String(), "<category>Zenn</category>") {
+		t.Fatalf("RSS does not identify post sources: %s", rec.Body.String())
 	}
 }
 

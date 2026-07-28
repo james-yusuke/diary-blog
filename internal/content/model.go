@@ -28,7 +28,10 @@ type Post struct {
 	ReadingMins int
 }
 
-const SourceZenn = "zenn"
+const (
+	SourceDiary = "diary"
+	SourceZenn  = "zenn"
+)
 
 func (p Post) URL() string {
 	if p.Source == SourceZenn {
@@ -37,7 +40,13 @@ func (p Post) URL() string {
 	return "/posts/" + p.Slug
 }
 
-func (p Post) IsZenn() bool        { return p.Source == SourceZenn }
+func (p Post) IsZenn() bool { return p.Source == SourceZenn }
+func (p Post) SourceLabel() string {
+	if p.IsZenn() {
+		return "Zenn"
+	}
+	return "独自記事"
+}
 func (p Post) DisplayDate() string { return p.Published.Format("2006.01.02") }
 
 type Tag struct {
