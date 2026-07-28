@@ -46,13 +46,26 @@ func (a *App) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) post(w http.ResponseWriter, r *http.Request) {
-	slug := strings.TrimPrefix(r.URL.Path, "/posts/")
+	path := strings.TrimPrefix(r.URL.Path, "/posts/")
+	isZenn := strings.HasPrefix(path, "zenn/")
+	slug := path
+	if isZenn {
+		slug = strings.TrimPrefix(path, "zenn/")
+	}
 	if slug == "" || strings.Contains(slug, "/") {
 		a.notFound(w, r)
 		return
 	}
 	post, ok := a.store.Find(slug)
 	if !ok {
+		a.notFound(w, r)
+		return
+	}
+	if post.IsZenn() != isZenn {
+		if post.IsZenn() {
+			http.Redirect(w, r, post.URL(), http.StatusMovedPermanently)
+			return
+		}
 		a.notFound(w, r)
 		return
 	}

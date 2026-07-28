@@ -141,6 +141,7 @@ func parsePost(path string) (Post, bool, error) {
 		return Post{}, false, fmt.Errorf("validate post %s: %w", path, err)
 	}
 	post, err := renderPost(meta.Slug, meta.Title, meta.Summary, meta.Published, meta.Tags, body)
+	post.Source = "diary"
 	return post, meta.Draft, err
 }
 
@@ -175,6 +176,7 @@ func parseZennPost(path string) (Post, bool, error) {
 		return Post{}, false, fmt.Errorf("validate Zenn post %s: filename must be lowercase letters, digits, hyphens, or underscores", path)
 	}
 	post, err := renderPost(slug, meta.Title, summary, published, meta.Topics, body)
+	post.Source = SourceZenn
 	return post, false, err
 }
 

@@ -36,7 +36,7 @@ func TestGenerateEmbedsDiaryAndZennContent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, fragment := range []string{`Slug: "diary-post"`, `Slug: "zenn_post"`, `time.FixedZone("JST", 32400)`} {
+	for _, fragment := range []string{`Source: "diary", Slug: "diary-post"`, `Source: "zenn", Slug: "zenn_post"`, `time.FixedZone("JST", 32400)`} {
 		if !strings.Contains(string(generated), fragment) {
 			t.Fatalf("generated content missing %q: %s", fragment, generated)
 		}
@@ -47,7 +47,7 @@ func TestGenerateEmbedsDiaryAndZennContent(t *testing.T) {
 	}
 	for _, fragment := range []string{`workerTokensCSS`, `workerMermaidJS`, `workerSiteJS`} {
 		if !strings.Contains(string(assets), fragment) {
-		t.Fatalf("generated Worker assets do not include Mermaid JavaScript: %s", assets)
+			t.Fatalf("generated Worker assets do not include Mermaid JavaScript: %s", assets)
 		}
 	}
 }

@@ -13,19 +13,28 @@ func testApp(t *testing.T) *App {
 	t.Helper()
 	root := t.TempDir()
 	configPath := filepath.Join(root, "site.yaml")
-	postsDir := filepath.Join(root, "posts")
-	if err := os.Mkdir(postsDir, 0o755); err != nil {
+	contentDir := filepath.Join(root, "content")
+	postsDir := filepath.Join(contentDir, "posts")
+	zennDir := filepath.Join(contentDir, "zenn", "articles")
+	if err := os.MkdirAll(postsDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(zennDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	config := "title: diary\nauthor_name: James Yusuke\ndescription: test description\nbio: test bio\ngithub_url: https://github.com/james-yusuke\nrepository_url: https://github.com/james-yusuke\nbase_url: https://example.test\n"
 	post := "---\nslug: hello-templ\ntitle: Hello templ\nsummary: A note about components\npublished_at: 2026-01-02\ntags:\n  - Go\n  - templ\n---\n\n# Hello\n\nA useful body."
+	zennPost := "---\ntitle: Zenn note\ntopics:\n  - Go\npublished: true\npublished_at: \"2026-01-03 09:00\"\n---\n\n# Zenn\n\nA Zenn body."
 	if err := os.WriteFile(configPath, []byte(config), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.WriteFile(filepath.Join(postsDir, "hello.md"), []byte(post), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	app, err := New(configPath, postsDir)
+	if err := os.WriteFile(filepath.Join(zennDir, "zenn-note.md"), []byte(zennPost), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	app, err := New(configPath, contentDir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,6 +47,7 @@ func TestRoutesRenderExpectedPages(t *testing.T) {
 		{"/", "Hello templ"},
 		{"/?q=components", "検索結果"},
 		{"/posts/hello-templ", "A useful body"},
+		{"/posts/zenn/zenn-note", "A Zenn body"},
 		{"/tags/Go", "ほかのテーマ"},
 		{"/about", "James Yusuke"},
 		{"/posts/hello-templ", "/assets/mermaid.js"},
@@ -56,7 +66,7 @@ func TestRoutesRenderExpectedPages(t *testing.T) {
 
 func TestNotFoundAndRSS(t *testing.T) {
 	app := testApp(t)
-	for _, path := range []string{"/posts/nope", "/tags/nope"} {
+	for _, path := range []string{"/posts/nope", "/posts/zenn/hello-templ", "/tags/nope"} {
 		rec := httptest.NewRecorder()
 		app.Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
 		if rec.Code != http.StatusNotFound {
@@ -70,5 +80,17 @@ func TestNotFoundAndRSS(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), "<rss version=\"2.0\"") || !strings.Contains(rec.Body.String(), "Hello templ") {
 		t.Fatalf("unexpected RSS: %s", rec.Body.String())
+	}
+	if !strings.Contains(rec.Body.String(), "/posts/zenn/zenn-note") {
+		t.Fatalf("RSS does not use the Zenn URL: %s", rec.Body.String())
+	}
+}
+
+func TestLegacyZennURLRedirects(t *testing.T) {
+	app := testApp(t)
+	rec := httptest.NewRecorder()
+	app.Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/posts/zenn-note", nil))
+	if rec.Code != http.StatusMovedPermanently || rec.Header().Get("Location") != "/posts/zenn/zenn-note" {
+		t.Fatalf("legacy Zenn URL = %d, Location = %q", rec.Code, rec.Header().Get("Location"))
 	}
 }

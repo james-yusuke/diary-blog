@@ -17,6 +17,7 @@ type SiteConfig struct {
 }
 
 type Post struct {
+	Source      string
 	Slug        string
 	Title       string
 	Summary     string
@@ -27,7 +28,16 @@ type Post struct {
 	ReadingMins int
 }
 
-func (p Post) URL() string         { return "/posts/" + p.Slug }
+const SourceZenn = "zenn"
+
+func (p Post) URL() string {
+	if p.Source == SourceZenn {
+		return "/posts/zenn/" + p.Slug
+	}
+	return "/posts/" + p.Slug
+}
+
+func (p Post) IsZenn() bool        { return p.Source == SourceZenn }
 func (p Post) DisplayDate() string { return p.Published.Format("2006.01.02") }
 
 type Tag struct {

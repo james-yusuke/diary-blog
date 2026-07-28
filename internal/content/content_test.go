@@ -66,6 +66,9 @@ func TestLoadRecursivelyReadsDiaryAndZennArticles(t *testing.T) {
 	if zenn.Summary != "First Zenn paragraph." {
 		t.Fatalf("summary = %q", zenn.Summary)
 	}
+	if !zenn.IsZenn() || zenn.URL() != "/posts/zenn/zenn_article" {
+		t.Fatalf("Zenn URL = %q, source = %q", zenn.URL(), zenn.Source)
+	}
 	if got := store.PostsForTag("Zenn"); len(got) != 1 || got[0].Slug != "zenn_article" {
 		t.Fatalf("Zenn posts = %#v", got)
 	}

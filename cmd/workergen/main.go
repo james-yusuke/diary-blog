@@ -65,7 +65,7 @@ func writeContent(path string, store *content.Store) error {
 	b.WriteString("var embeddedPosts = []Post{\n")
 	for _, post := range store.Posts {
 		zoneName, offset := post.Published.Zone()
-		fmt.Fprintf(&b, "{Slug: %q, Title: %q, Summary: %q, Published: time.Date(%d, time.Month(%d), %d, %d, %d, %d, %d, time.FixedZone(%q, %d)), Tags: []string{%s}, Body: %q, HTML: %q, ReadingMins: %d},\n", post.Slug, post.Title, post.Summary, post.Published.Year(), post.Published.Month(), post.Published.Day(), post.Published.Hour(), post.Published.Minute(), post.Published.Second(), post.Published.Nanosecond(), zoneName, offset, quotedStrings(post.Tags), post.Body, post.HTML, post.ReadingMins)
+		fmt.Fprintf(&b, "{Source: %q, Slug: %q, Title: %q, Summary: %q, Published: time.Date(%d, time.Month(%d), %d, %d, %d, %d, %d, time.FixedZone(%q, %d)), Tags: []string{%s}, Body: %q, HTML: %q, ReadingMins: %d},\n", post.Source, post.Slug, post.Title, post.Summary, post.Published.Year(), post.Published.Month(), post.Published.Day(), post.Published.Hour(), post.Published.Minute(), post.Published.Second(), post.Published.Nanosecond(), zoneName, offset, quotedStrings(post.Tags), post.Body, post.HTML, post.ReadingMins)
 	}
 	b.WriteString("}\n")
 	return writeFormatted(path, b.Bytes())
