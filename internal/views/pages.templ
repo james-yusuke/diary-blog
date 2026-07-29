@@ -19,6 +19,12 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 			<link rel="preconnect" href="https://fonts.googleapis.com"/>
 			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
 			<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet"/>
+			<script>
+				try {
+					const savedTheme = localStorage.getItem("diary-theme")
+					if (savedTheme === "light" || savedTheme === "dark") document.documentElement.dataset.theme = savedTheme
+				} catch {}
+			</script>
 			<link rel="stylesheet" href="/assets/site.css"/>
 			<script defer src="/assets/site.js"></script>
 			<script type="module" src="/assets/mermaid.js"></script>
@@ -35,6 +41,9 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 					</nav>
 					<button class="search-trigger" type="button" data-command-trigger aria-haspopup="dialog" aria-controls="command-palette" aria-label="記事を検索">
 						<span aria-hidden="true">⌕</span><span class="search-trigger__label">検索</span><span class="search-trigger__key" aria-hidden="true">⌘K</span>
+					</button>
+					<button class="theme-toggle" type="button" data-theme-toggle aria-label="表示テーマを切り替える">
+						<span class="theme-toggle__icon" data-theme-icon aria-hidden="true">◐</span><span class="theme-toggle__label" data-theme-label>自動</span>
 					</button>
 				</div>
 			</header>

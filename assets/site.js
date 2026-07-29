@@ -1,4 +1,61 @@
 (() => {
+  const root = document.documentElement;
+  const themeToggle = document.querySelector("[data-theme-toggle]");
+  const themeStorageKey = "diary-theme";
+  const themeModes = ["system", "light", "dark"];
+  const themeLabels = { system: "自動", light: "ライト", dark: "ダーク" };
+  const themeIcons = { system: "◐", light: "☀", dark: "◑" };
+  const colorScheme = window.matchMedia("(prefers-color-scheme: dark)");
+  let themeMode = "system";
+
+  try {
+    const storedTheme = window.localStorage.getItem(themeStorageKey);
+    if (themeModes.includes(storedTheme)) themeMode = storedTheme;
+  } catch {
+    // A blocked storage area should not prevent the site from following the OS.
+  }
+
+  const effectiveTheme = () => themeMode === "system" ? (colorScheme.matches ? "dark" : "light") : themeMode;
+  const nextThemeMode = () => {
+    if (themeMode === "system") return effectiveTheme() === "dark" ? "light" : "dark";
+    if (themeMode === "light") return "dark";
+    return "system";
+  };
+  const renderTheme = () => {
+    if (themeMode === "system") {
+      delete root.dataset.theme;
+    } else {
+      root.dataset.theme = themeMode;
+    }
+    if (!themeToggle) return;
+
+    const nextTheme = nextThemeMode();
+    themeToggle.dataset.themeMode = themeMode;
+    themeToggle.querySelector("[data-theme-icon]").textContent = themeIcons[themeMode];
+    themeToggle.querySelector("[data-theme-label]").textContent = themeLabels[themeMode];
+    themeToggle.setAttribute("aria-pressed", String(effectiveTheme() === "dark"));
+    themeToggle.setAttribute("aria-label", `現在の表示テーマ: ${themeLabels[themeMode]}。${themeLabels[nextTheme]}に切り替える`);
+    themeToggle.title = `表示テーマ: ${themeLabels[themeMode]}（クリックで${themeLabels[nextTheme]}）`;
+  };
+
+  renderTheme();
+  themeToggle?.addEventListener("click", () => {
+    themeMode = nextThemeMode();
+    try {
+      if (themeMode === "system") {
+        window.localStorage.removeItem(themeStorageKey);
+      } else {
+        window.localStorage.setItem(themeStorageKey, themeMode);
+      }
+    } catch {
+      // The selected theme still applies for this page when storage is unavailable.
+    }
+    renderTheme();
+  });
+  colorScheme.addEventListener("change", () => {
+    if (themeMode === "system") renderTheme();
+  });
+
   const dialog = document.querySelector("#command-palette");
   const trigger = document.querySelector("[data-command-trigger]");
   const input = document.querySelector("#command-query");

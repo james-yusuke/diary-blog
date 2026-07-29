@@ -14,6 +14,7 @@
   --color-graphite: oklch(20% 0.012 45);
   --color-graphite-raised: oklch(27% 0.014 45);
   --color-graphite-muted: oklch(73% 0.012 70);
+  --color-code-ink: oklch(92% 0.009 70);
   --color-focus: oklch(62% 0.17 32);
   --font-display: "Manrope", sans-serif;
   --font-body: "IBM Plex Sans", sans-serif;
@@ -55,7 +56,8 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
+    color-scheme: dark;
     --color-paper: oklch(17% 0.012 45);
     --color-paper-raised: oklch(21% 0.014 45);
     --color-paper-strong: oklch(27% 0.016 45);
@@ -69,6 +71,29 @@
     --color-graphite: oklch(11% 0.01 45);
     --color-graphite-raised: oklch(18% 0.012 45);
     --color-graphite-muted: oklch(75% 0.01 65);
+    --color-code-ink: oklch(92% 0.009 70);
     --color-focus: oklch(73% 0.15 35);
   }
+}
+
+/* The default follows the OS. An explicit choice overrides it until reset to Auto. */
+:root[data-theme="light"] { color-scheme: light; }
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-paper: oklch(17% 0.012 45);
+  --color-paper-raised: oklch(21% 0.014 45);
+  --color-paper-strong: oklch(27% 0.016 45);
+  --color-ink: oklch(94% 0.006 70);
+  --color-ink-soft: oklch(85% 0.008 70);
+  --color-muted: oklch(70% 0.01 65);
+  --color-rule: oklch(34% 0.015 50);
+  --color-rule-strong: oklch(56% 0.028 42);
+  --color-accent: oklch(73% 0.15 35);
+  --color-accent-ink: oklch(18% 0.012 45);
+  --color-graphite: oklch(11% 0.01 45);
+  --color-graphite-raised: oklch(18% 0.012 45);
+  --color-graphite-muted: oklch(75% 0.01 65);
+  --color-code-ink: oklch(92% 0.009 70);
+  --color-focus: oklch(73% 0.15 35);
 }

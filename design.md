@@ -13,6 +13,7 @@
 - Mono: JetBrains Mono 400–600
 - Spacing: `assets/tokens.css` の4px基準トークンだけを使う
 - Motion: 原則静的。操作フィードバックだけを120–220msの`transform`/`opacity`で扱い、reduced motionでは即時化する
+- Color mode: 初期値はOS設定に追従する。ヘッダーの単一ボタンで自動・ライト・ダークを循環し、最初の操作では現在の見た目と反対のテーマへ切り替える。明示選択はブラウザに保存する
 
 ## Page families
 
@@ -22,7 +23,7 @@
 
 ## Shared chrome
 
-- Navigation: N9 edge-aligned minimal。記事一覧・Security・Aboutと検索トリガーだけを置く
+- Navigation: N9 edge-aligned minimal。記事一覧・Security・About、検索トリガー、テーマ切替だけを置く
 - Footer: Ft2 inline rule。短いクレジットとGitHub / RSSリンクを一行で閉じる
 - CTA: 塗りつぶしではなく下線付きテキストリンクを基本とし、検索など操作が必要な場面だけ暗いインクのボタンを使う
 - Accent: coralはキーボードフォーカス、現在地、短い注記に限定する。大面積には使わない
