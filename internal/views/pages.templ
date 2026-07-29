@@ -62,7 +62,7 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 	</html>
 }
 
-	templ HomePage(site content.SiteConfig, posts []content.Post, tags []content.Tag, query string) {
+templ HomePage(site content.SiteConfig, posts []content.Post, tags []content.Tag, query string) {
 	@Layout(site, "diary — "+site.AuthorName) {
 		<main id="main">
 			<section class="shell index-intro">
