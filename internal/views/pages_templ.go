@@ -969,7 +969,7 @@ func AboutPage(site content.SiteConfig) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "\">GitHubを見る →</a><p>Web開発、Go、開発に関するお仕事のご依頼を受け付けています。<a href=\"mailto:contact@yecov.com\">contact@yecov.com</a>までお気軽にご連絡ください。</p><p class=\"repo-note\">記事は <a href=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 74, "\">GitHubを見る →</a><p>Web開発やGoを中心とした開発案件のご依頼を受け付けています。<a href=\"mailto:contact@yecov.com\">contact@yecov.com</a>までお気軽にご連絡ください。</p><p class=\"repo-note\">記事は <a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

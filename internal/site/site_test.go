@@ -58,7 +58,7 @@ func TestRoutesRenderExpectedPages(t *testing.T) {
 		{"/tags/Go", "ほかのテーマ"},
 		{"/about", "James Yusuke"},
 		{"/about", "contact@yecov.com"},
-		{"/about", "お仕事のご相談を受け付けています"},
+		{"/about", "Web開発やGoを中心とした開発案件のご依頼を受け付けています"},
 		{"/posts/hello-templ", "/assets/mermaid.js"},
 	} {
 		req := httptest.NewRequest(http.MethodGet, tc.path, nil)
