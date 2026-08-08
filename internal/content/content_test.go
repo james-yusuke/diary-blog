@@ -149,3 +149,16 @@ func TestZennSummaryTruncatesTo160Runes(t *testing.T) {
 		t.Fatalf("summary = %q (%d runes)", summary, got)
 	}
 }
+
+func TestRenderPostSupportsFootnoteReferences(t *testing.T) {
+	post, err := renderPost("footnotes", "Footnotes", "Summary", time.Date(2026, time.January, 1, 0, 0, 0, 0, time.UTC), []string{"Go"}, "本文の参照[^go-asm]。\n\n[^go-asm]: [Go assembler guide](https://go.dev/doc/asm)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(post.HTML, "[^go-asm]") {
+		t.Fatalf("footnote reference was left as literal text: %s", post.HTML)
+	}
+	if !strings.Contains(post.HTML, `class="footnote-ref"`) || !strings.Contains(post.HTML, "Go assembler guide") {
+		t.Fatalf("footnote was not rendered as a reference and definition: %s", post.HTML)
+	}
+}

@@ -258,7 +258,7 @@ func readFrontMatter(path string) (string, string, error) {
 
 func renderPost(slug, title, summary string, published time.Time, tags []string, body string) (Post, error) {
 	var rendered bytes.Buffer
-	markdown := goldmark.New(goldmark.WithExtensions(extension.GFM), goldmark.WithParserOptions(parser.WithAutoHeadingID()))
+	markdown := goldmark.New(goldmark.WithExtensions(extension.GFM, extension.Footnote), goldmark.WithParserOptions(parser.WithAutoHeadingID()))
 	if err := markdown.Convert([]byte(body), &rendered); err != nil {
 		return Post{}, fmt.Errorf("render post %s: %w", slug, err)
 	}
