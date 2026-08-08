@@ -7,6 +7,8 @@ on:
         description: "Zenn の同期対象コミットSHA（空なら main の最新）"
         required: false
         type: string
+  repository_dispatch:
+    types: [zenn_updated]
   # 通知失敗時の保険。通常の同期は Zenn の push 通知で即時に実行される。
   schedule:
     - cron: "23 3 * * *"
@@ -33,7 +35,7 @@ jobs:
       - name: Clone requested private Zenn revision
         env:
           ZENN_REPO_TOKEN: ${{ secrets.ZENN_REPO_TOKEN }}
-          ZENN_SHA: ${{ github.event.inputs.zenn_sha || '' }}
+          ZENN_SHA: ${{ github.event.inputs.zenn_sha || github.event.client_payload.zenn_sha || github.event.client_payload.sha || '' }}
         run: |
           if [ -z "$ZENN_REPO_TOKEN" ]; then
             echo "ZENN_REPO_TOKEN must be configured to sync private Zenn content." >&2
