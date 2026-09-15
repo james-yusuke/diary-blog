@@ -48,6 +48,10 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 				</div>
 			</header>
 			{ children... }
+			<aside class="admax-placement shell" aria-label="広告">
+				<span class="admax-placement__label">ADVERTISEMENT</span>
+				<script src="https://adm.shinobi.jp/s/aec20509a6f514d325d9e767b7573e90"></script>
+			</aside>
 			<footer class="site-footer">
 				<div class="shell footer-inner">
 					<span>{ site.AuthorName } · engineering notes</span><div><a href={ templ.SafeURL(site.GitHubURL) }>GitHub</a><a href={ templ.SafeURL(site.RepositoryURL) }>Repository</a><a href="/feed.xml">RSS</a></div>

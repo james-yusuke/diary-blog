@@ -60,6 +60,7 @@ func TestRoutesRenderExpectedPages(t *testing.T) {
 		{"/about", "contact@yecov.com"},
 		{"/about", "Web開発やGoを中心とした開発案件のご依頼を受け付けています"},
 		{"/posts/hello-templ", "/assets/mermaid.js"},
+		{"/posts/hello-templ", "https://adm.shinobi.jp/s/aec20509a6f514d325d9e767b7573e90"},
 	} {
 		req := httptest.NewRequest(http.MethodGet, tc.path, nil)
 		rec := httptest.NewRecorder()

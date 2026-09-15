@@ -113,6 +113,8 @@ h1, h2, h3 { min-width: 0; font-family: var(--font-display); font-style: normal;
 .footer-inner div { display: flex; flex-wrap: wrap; gap: var(--space-md); }
 .footer-inner a { color: var(--color-ink-soft); text-decoration: none; white-space: nowrap; }
 .footer-inner a:hover { color: var(--color-accent); }
+.admax-placement { display: grid; justify-items: center; gap: var(--space-xs); padding-block: var(--space-xl); }
+.admax-placement__label { color: var(--color-muted); font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: 0.08em; }
 
 .command-palette { width: min(100% - var(--space-lg), 34rem); max-height: min(80dvh, 42rem); padding: 0; border: var(--rule) solid var(--color-rule-strong); border-radius: var(--radius-panel); background: var(--color-paper); color: var(--color-ink); box-shadow: 0 var(--space-lg) var(--space-3xl) color-mix(in oklch, var(--color-graphite) 22%, transparent); }
 .command-palette::backdrop { background: color-mix(in oklch, var(--color-graphite) 52%, transparent); }
