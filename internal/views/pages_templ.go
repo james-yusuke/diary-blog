@@ -82,7 +82,7 @@ func Layout(site content.SiteConfig, pageTitle string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<aside class=\"admax-placement shell\" aria-label=\"広告\"><span class=\"admax-placement__label\">ADVERTISEMENT</span><script src=\"https://adm.shinobi.jp/s/aec20509a6f514d325d9e767b7573e90\"></script></aside><footer class=\"site-footer\"><div class=\"shell footer-inner\"><span>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<aside class=\"admax-placement shell\" aria-label=\"広告\"><span class=\"admax-placement__label\">ADVERTISEMENT</span><script src=\"https://adm.shinobi.jp/s/ff7857b8f66ddc2e46d7140a2a2db6fc\"></script></aside><footer class=\"site-footer\"><div class=\"shell footer-inner\"><span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
