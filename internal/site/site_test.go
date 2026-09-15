@@ -99,6 +99,21 @@ func TestNotFoundAndRSS(t *testing.T) {
 	}
 }
 
+func TestAdsTXT(t *testing.T) {
+	app := testApp(t)
+	rec := httptest.NewRecorder()
+	app.Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/ads.txt", nil))
+	if rec.Code != http.StatusOK {
+		t.Fatalf("GET /ads.txt status = %d", rec.Code)
+	}
+	if !strings.Contains(rec.Header().Get("Content-Type"), "text/plain") {
+		t.Fatalf("GET /ads.txt Content-Type = %q", rec.Header().Get("Content-Type"))
+	}
+	if !strings.Contains(rec.Body.String(), "adm.shinobi.jp,231582,DIRECT") {
+		t.Fatalf("GET /ads.txt missing Shinobi direct declaration")
+	}
+}
+
 func TestLegacyZennURLRedirects(t *testing.T) {
 	app := testApp(t)
 	rec := httptest.NewRecorder()

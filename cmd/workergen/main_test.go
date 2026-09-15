@@ -20,6 +20,7 @@ func TestGenerateEmbedsDiaryAndZennContent(t *testing.T) {
 		"assets/tokens.css":                  ":root {}",
 		"assets/mermaid.js":                  "export default {};",
 		"assets/site.js":                     "export default {};",
+		"internal/site/ads.txt":              "adm.shinobi.jp,231582,DIRECT\n",
 		"content/posts/diary.md":             "---\nslug: diary-post\ntitle: Diary\nsummary: Summary\npublished_at: 2026-01-01\ntags:\n  - Go\n---\n\nDiary body.",
 		"content/posts/rfc3339.md":           "---\nslug: rfc3339-post\ntitle: RFC3339\nsummary: Summary\npublished_at: \"2026-07-28T14:38:00+09:00\"\ntags:\n  - Go\n---\n\nRFC3339 body.",
 		"content/zenn/articles/zenn_post.md": "---\ntitle: Zenn\ntopics:\n  - Zenn\npublished: true\npublished_at: \"2999-01-02 09:00\"\n---\n\nZenn body.",
@@ -46,7 +47,7 @@ func TestGenerateEmbedsDiaryAndZennContent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, fragment := range []string{`workerTokensCSS`, `workerMermaidJS`, `workerSiteJS`} {
+	for _, fragment := range []string{`workerTokensCSS`, `workerMermaidJS`, `workerSiteJS`, `workerAdsTXT`, `adm.shinobi.jp,231582,DIRECT`} {
 		if !strings.Contains(string(assets), fragment) {
 			t.Fatalf("generated Worker assets do not include Mermaid JavaScript: %s", assets)
 		}
