@@ -48,10 +48,6 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 				</div>
 			</header>
 			{ children... }
-			<aside class="admax-placement shell" aria-label="広告">
-				<span class="admax-placement__label">ADVERTISEMENT</span>
-				<script src="https://adm.shinobi.jp/s/ff7857b8f66ddc2e46d7140a2a2db6fc"></script>
-			</aside>
 			<footer class="site-footer">
 				<div class="shell footer-inner">
 					<span>{ site.AuthorName } · engineering notes</span><div><a href={ templ.SafeURL(site.GitHubURL) }>GitHub</a><a href={ templ.SafeURL(site.RepositoryURL) }>Repository</a><a href="/feed.xml">RSS</a></div>
@@ -159,8 +155,16 @@ templ PostPage(site content.SiteConfig, post content.Post, related []content.Pos
 					</div>
 				</section>
 			}
+			@AdMax()
 		</main>
 	}
+}
+
+templ AdMax() {
+	<section class="admax-placement" aria-label="広告">
+		<span class="admax-placement__label">ADVERTISEMENT</span>
+		<script src="https://adm.shinobi.jp/s/ff7857b8f66ddc2e46d7140a2a2db6fc"></script>
+	</section>
 }
 
 templ TagPage(site content.SiteConfig, tag string, posts []content.Post, tags []content.Tag) {

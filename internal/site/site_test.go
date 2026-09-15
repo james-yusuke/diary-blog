@@ -114,6 +114,25 @@ func TestAdsTXT(t *testing.T) {
 	}
 }
 
+func TestAdvertisementOnlyAppearsOnPosts(t *testing.T) {
+	app := testApp(t)
+	for _, tc := range []struct {
+		path string
+		want bool
+	}{
+		{path: "/", want: false},
+		{path: "/about", want: false},
+		{path: "/posts/hello-templ", want: true},
+	} {
+		rec := httptest.NewRecorder()
+		app.Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, tc.path, nil))
+		got := strings.Contains(rec.Body.String(), "https://adm.shinobi.jp/s/ff7857b8f66ddc2e46d7140a2a2db6fc")
+		if got != tc.want {
+			t.Errorf("GET %s advertisement = %t, want %t", tc.path, got, tc.want)
+		}
+	}
+}
+
 func TestLegacyZennURLRedirects(t *testing.T) {
 	app := testApp(t)
 	rec := httptest.NewRecorder()
