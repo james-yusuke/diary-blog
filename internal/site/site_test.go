@@ -60,7 +60,6 @@ func TestRoutesRenderExpectedPages(t *testing.T) {
 		{"/about", "contact@yecov.com"},
 		{"/about", "Web開発やGoを中心とした開発案件のご依頼を受け付けています"},
 		{"/posts/hello-templ", "/assets/mermaid.js"},
-		{"/posts/hello-templ", "https://adm.shinobi.jp/s/ff7857b8f66ddc2e46d7140a2a2db6fc"},
 	} {
 		req := httptest.NewRequest(http.MethodGet, tc.path, nil)
 		rec := httptest.NewRecorder()
@@ -96,40 +95,6 @@ func TestNotFoundAndRSS(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), "<category>独自記事</category>") || !strings.Contains(rec.Body.String(), "<category>Zenn</category>") {
 		t.Fatalf("RSS does not identify post sources: %s", rec.Body.String())
-	}
-}
-
-func TestAdsTXT(t *testing.T) {
-	app := testApp(t)
-	rec := httptest.NewRecorder()
-	app.Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/ads.txt", nil))
-	if rec.Code != http.StatusOK {
-		t.Fatalf("GET /ads.txt status = %d", rec.Code)
-	}
-	if !strings.Contains(rec.Header().Get("Content-Type"), "text/plain") {
-		t.Fatalf("GET /ads.txt Content-Type = %q", rec.Header().Get("Content-Type"))
-	}
-	if !strings.Contains(rec.Body.String(), "adm.shinobi.jp,231582,DIRECT") {
-		t.Fatalf("GET /ads.txt missing Shinobi direct declaration")
-	}
-}
-
-func TestAdvertisementOnlyAppearsOnPosts(t *testing.T) {
-	app := testApp(t)
-	for _, tc := range []struct {
-		path string
-		want bool
-	}{
-		{path: "/", want: false},
-		{path: "/about", want: false},
-		{path: "/posts/hello-templ", want: true},
-	} {
-		rec := httptest.NewRecorder()
-		app.Handler().ServeHTTP(rec, httptest.NewRequest(http.MethodGet, tc.path, nil))
-		got := strings.Contains(rec.Body.String(), "https://adm.shinobi.jp/s/ff7857b8f66ddc2e46d7140a2a2db6fc")
-		if got != tc.want {
-			t.Errorf("GET %s advertisement = %t, want %t", tc.path, got, tc.want)
-		}
 	}
 }
 

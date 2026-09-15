@@ -5,15 +5,6 @@ package site
 import "net/http"
 
 func registerStatic(mux *http.ServeMux) {
-	mux.HandleFunc("/ads.txt", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet && r.Method != http.MethodHead {
-			http.NotFound(w, r)
-			return
-		}
-		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-		w.Header().Set("Cache-Control", "public, max-age=86400")
-		_, _ = w.Write([]byte(workerAdsTXT))
-	})
 	mux.HandleFunc("/assets/site.css", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet && r.Method != http.MethodHead {
 			http.NotFound(w, r)
