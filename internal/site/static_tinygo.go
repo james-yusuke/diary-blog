@@ -11,7 +11,8 @@ func registerStatic(mux *http.ServeMux) {
 			return
 		}
 		w.Header().Set("Content-Type", "text/css; charset=utf-8")
-		w.Header().Set("Cache-Control", "public, max-age=86400")
+		// This stylesheet changes in place, so browsers must revalidate it.
+		w.Header().Set("Cache-Control", "no-cache")
 		_, _ = w.Write([]byte(workerCSS))
 	})
 	mux.HandleFunc("/assets/tokens.css", func(w http.ResponseWriter, r *http.Request) {
