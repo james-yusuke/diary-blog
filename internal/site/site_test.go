@@ -57,7 +57,7 @@ func TestRoutesRenderExpectedPages(t *testing.T) {
 		{"/posts/zenn/zenn-note", "Zenn"},
 		{"/tags/Go", "ほかのテーマ"},
 		{"/about", "James Yusuke"},
-		{"/about", "contact@yecov.com"},
+		{"/about", "james-yusuke@yecov.com"},
 		{"/about", "Web開発やGoを中心とした開発案件のご依頼を受け付けています"},
 		{"/posts/hello-templ", "/assets/mermaid.js"},
 	} {
