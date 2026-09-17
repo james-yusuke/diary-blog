@@ -125,3 +125,57 @@
     }
   });
 })();
+
+(() => {
+  const formats = {
+    banner: [
+      { key: '1a3cd0c7d36af5078c29bd8f41bdc95b', width: 728, height: 90 },
+      { key: 'da18ef204e7b72146c8ce85420eac594', width: 468, height: 60 },
+      { key: '065a5fd44299f5ebee83fa46c8f5db7d', width: 320, height: 50 },
+    ],
+    rectangle: [{ key: 'ea4a4dbf301abc0aee8bda933db1f8d5', width: 300, height: 250 }],
+    sidebar: [{ key: '2366343916f8323dacb9bb48aaadb93f', width: 160, height: 300 }],
+    tall: [{ key: '74be395aaed36f9088c2eb979381baea', width: 160, height: 600 }],
+  };
+
+  // Each banner gets its own document so atOptions and document.write cannot
+  // overwrite another slot or the blog. Load only visible, nearby placements.
+  document.querySelectorAll('[data-ad-slot]').forEach((slot) => {
+    const mount = slot.querySelector('[data-ad-mount]');
+    let selected;
+    let nearby = false;
+    const render = () => {
+      const width = slot.getBoundingClientRect().width;
+      const format = formats[slot.dataset.adSlot]?.find((item) => item.width <= width);
+      if (!slot.getClientRects().length || !format) {
+        mount.replaceChildren();
+        mount.style.height = "0px";
+        selected = undefined;
+        slot.classList.remove('ad-slot--ready');
+        return;
+      }
+      slot.classList.add('ad-slot--ready');
+      mount.style.height = `${format.height}px`;
+      if (!nearby || selected === format.key) return;
+      selected = format.key;
+      const frame = document.createElement('iframe');
+      frame.title = '広告';
+      frame.width = format.width;
+      frame.height = format.height;
+      frame.setAttribute('sandbox', 'allow-scripts allow-popups allow-popups-to-escape-sandbox');
+      frame.setAttribute('scrolling', 'no');
+      frame.srcdoc = `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>html,body{margin:0;padding:0;overflow:hidden}</style></head><body><script>var atOptions=${JSON.stringify({ ...format, format: 'iframe', params: {} })};<\/script><script src="https://www.highrevenueformat.com/${format.key}/invoke.js"><\/script></body></html>`;
+      mount.replaceChildren(frame);
+    };
+    new ResizeObserver(render).observe(slot);
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        nearby = true;
+        render();
+        observer.disconnect();
+      }
+    }, { rootMargin: '200px' });
+    observer.observe(slot);
+    render();
+  });
+})();

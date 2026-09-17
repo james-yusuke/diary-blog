@@ -25,8 +25,8 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 					if (savedTheme === "light" || savedTheme === "dark") document.documentElement.dataset.theme = savedTheme
 				} catch {}
 			</script>
-			<link rel="stylesheet" href="/assets/site.css?v=20260916"/>
-			<script defer src="/assets/site.js"></script>
+			<link rel="stylesheet" href="/assets/site.css?v=20260917"/>
+			<script defer src="/assets/site.js?v=20260917"></script>
 			<script type="module" src="/assets/mermaid.js"></script>
 		</head>
 		<body>
@@ -60,6 +60,14 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 			</dialog>
 		</body>
 	</html>
+}
+
+// AdSlot reserves space only when JavaScript selects a fitting format.
+templ AdSlot(format string, extraClass string) {
+	<aside class={ "ad-slot " + extraClass } data-ad-slot={ format } aria-label="広告">
+		<span class="ad-slot__label">広告</span>
+		<div class="ad-slot__mount" data-ad-mount></div>
+	</aside>
 }
 
 templ HomePage(site content.SiteConfig, posts []content.Post, tags []content.Tag, query string) {
@@ -105,8 +113,14 @@ templ HomePage(site content.SiteConfig, posts []content.Post, tags []content.Tag
 							<a href={ templ.SafeURL("/tags/" + url.PathEscape(tag.Name)) }>{ tag.Name } <span>{ tag.Count }</span></a>
 						}
 					</div>
+					if query == "" && len(posts) > 0 {
+						@AdSlot("sidebar", "ad-slot--sidebar")
+					}
 				</aside>
 			</section>
+			if query == "" && len(posts) > 0 {
+				<div class="shell">@AdSlot("banner", "ad-slot--end")</div>
+			}
 		</main>
 	}
 }
@@ -129,32 +143,36 @@ templ PostCard(post content.Post) {
 
 templ PostPage(site content.SiteConfig, post content.Post, related []content.Post) {
 	@Layout(site, post.Title+" — "+site.Title) {
-		<main id="main" class="article-shell shell">
-			<a class="back-link" href="/">← 記事一覧</a>
-			<article class="article">
-				<header class="article-header">
-					<p class="article-source"><span class="source-label" data-source={ post.Source }>{ post.SourceLabel() }</span></p>
-					<p class="article-tags">
-						for _, tag := range post.Tags {
-							<span>{ tag } </span>
-						}
-					</p>
-					<h1>{ post.Title }</h1>
-					<p class="article-summary">{ post.Summary }</p>
-					<div class="article-byline"><span>{ post.DisplayDate() } · { post.ReadingMins } min read</span><span>by { site.AuthorName }</span></div>
-				</header>
-				<div class="prose">@templ.Raw(string(post.HTML))</div>
-			</article>
-			if len(related) > 0 {
-				<section class="related">
-					<h2>あわせて読みたい</h2>
-					<div class="post-list">
-						for _, candidate := range related {
-							@PostCard(candidate)
-						}
-					</div>
-				</section>
-			}
+		<main id="main" class="article-shell article-shell--ads shell">
+			<div class="article-main">
+				<a class="back-link" href="/">← 記事一覧</a>
+				<article class="article">
+					<header class="article-header">
+						<p class="article-source"><span class="source-label" data-source={ post.Source }>{ post.SourceLabel() }</span></p>
+						<p class="article-tags">
+							for _, tag := range post.Tags {
+								<span>{ tag } </span>
+							}
+						</p>
+						<h1>{ post.Title }</h1>
+						<p class="article-summary">{ post.Summary }</p>
+						<div class="article-byline"><span>{ post.DisplayDate() } · { post.ReadingMins } min read</span><span>by { site.AuthorName }</span></div>
+					</header>
+					<div class="prose">@templ.Raw(string(post.HTML))</div>
+				</article>
+				@AdSlot("rectangle", "ad-slot--end")
+				if len(related) > 0 {
+					<section class="related">
+						<h2>あわせて読みたい</h2>
+						<div class="post-list">
+							for _, candidate := range related {
+								@PostCard(candidate)
+							}
+						</div>
+					</section>
+				}
+			</div>
+			@AdSlot("tall", "ad-slot--article-sidebar")
 		</main>
 	}
 }
