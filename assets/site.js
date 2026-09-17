@@ -138,8 +138,10 @@
     tall: [{ key: '74be395aaed36f9088c2eb979381baea', width: 160, height: 600 }],
   };
 
-  // Each banner gets its own document so atOptions and document.write cannot
-  // overwrite another slot or the blog. Load only visible, nearby placements.
+  // Run the provider in the publisher document: a sandboxed srcdoc has an
+  // opaque origin and cannot supply the publisher's storage/domain context.
+  // Serialize scripts because the supplied snippets share window.atOptions.
+  let pendingAd = Promise.resolve();
   document.querySelectorAll('[data-ad-slot]').forEach((slot) => {
     const mount = slot.querySelector('[data-ad-mount]');
     let selected;
@@ -158,14 +160,28 @@
       mount.style.height = `${format.height}px`;
       if (!nearby || selected === format.key) return;
       selected = format.key;
-      const frame = document.createElement('iframe');
-      frame.title = '広告';
-      frame.width = format.width;
-      frame.height = format.height;
-      frame.setAttribute('sandbox', 'allow-scripts allow-popups allow-popups-to-escape-sandbox');
-      frame.setAttribute('scrolling', 'no');
-      frame.srcdoc = `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>html,body{margin:0;padding:0;overflow:hidden}</style></head><body><script>var atOptions=${JSON.stringify({ ...format, format: 'iframe', params: {} })};<\/script><script src="https://www.highrevenueformat.com/${format.key}/invoke.js"><\/script></body></html>`;
-      mount.replaceChildren(frame);
+      mount.replaceChildren();
+      pendingAd = pendingAd.then(() => new Promise((resolve) => {
+        // A resize may have replaced this request while another slot loaded.
+        if (selected !== format.key || !slot.getClientRects().length) {
+          resolve();
+          return;
+        }
+        window.atOptions = { ...format, format: 'iframe', params: {} };
+        const script = document.createElement('script');
+        script.src = `https://www.highrevenueformat.com/${format.key}/invoke.js`;
+        script.async = false;
+        script.onload = resolve;
+        script.onerror = () => {
+          if (selected === format.key) {
+            mount.replaceChildren();
+            mount.style.height = '0px';
+            slot.classList.remove('ad-slot--ready');
+          }
+          resolve();
+        };
+        mount.appendChild(script);
+      }));
     };
     new ResizeObserver(render).observe(slot);
     const observer = new IntersectionObserver((entries) => {
