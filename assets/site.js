@@ -2,31 +2,23 @@
   const root = document.documentElement;
   const themeToggle = document.querySelector("[data-theme-toggle]");
   const themeStorageKey = "diary-theme";
-  const themeModes = ["system", "light", "dark"];
+  const themeModes = ["dark", "light", "system"];
   const themeLabels = { system: "自動", light: "ライト", dark: "ダーク" };
-  const themeIcons = { system: "◐", light: "☀", dark: "◑" };
+  const themeIcons = { system: "◐", light: "☀", dark: "☾" };
   const colorScheme = window.matchMedia("(prefers-color-scheme: dark)");
-  let themeMode = "system";
+  let themeMode = "dark";
 
   try {
     const storedTheme = window.localStorage.getItem(themeStorageKey);
     if (themeModes.includes(storedTheme)) themeMode = storedTheme;
   } catch {
-    // A blocked storage area should not prevent the site from following the OS.
+    // The theme remains usable for this page when storage is unavailable.
   }
 
   const effectiveTheme = () => themeMode === "system" ? (colorScheme.matches ? "dark" : "light") : themeMode;
-  const nextThemeMode = () => {
-    if (themeMode === "system") return effectiveTheme() === "dark" ? "light" : "dark";
-    if (themeMode === "light") return "dark";
-    return "system";
-  };
+  const nextThemeMode = () => themeModes[(themeModes.indexOf(themeMode) + 1) % themeModes.length];
   const renderTheme = () => {
-    if (themeMode === "system") {
-      delete root.dataset.theme;
-    } else {
-      root.dataset.theme = themeMode;
-    }
+    root.dataset.theme = themeMode;
     if (!themeToggle) return;
 
     const nextTheme = nextThemeMode();
@@ -42,11 +34,7 @@
   themeToggle?.addEventListener("click", () => {
     themeMode = nextThemeMode();
     try {
-      if (themeMode === "system") {
-        window.localStorage.removeItem(themeStorageKey);
-      } else {
-        window.localStorage.setItem(themeStorageKey, themeMode);
-      }
+      window.localStorage.setItem(themeStorageKey, themeMode);
     } catch {
       // The selected theme still applies for this page when storage is unavailable.
     }

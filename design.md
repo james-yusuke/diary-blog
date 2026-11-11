@@ -6,27 +6,25 @@
 
 ## System
 
-- Genre: modern-minimal
-- Theme: Coral — warm-white paper, restrained coral signal, dark ink actions
-- Display: Manrope 600–700
-- Body: IBM Plex Sans 400–600
-- Mono: JetBrains Mono 400–600
+- ジャンルは技術記事を中心とするエディトリアル。暗い背景とライラックのアクセントを使う
+- 見出しと本文は Geist。日本語は OS のゴシック体を使う
+- 日付、件数、コードは IBM Plex Mono
 - Spacing: `assets/tokens.css` の4px基準トークンだけを使う
 - Motion: 原則静的。操作フィードバックだけを120–220msの`transform`/`opacity`で扱い、reduced motionでは即時化する
-- Color mode: 初期値はOS設定に追従する。ヘッダーの単一ボタンで自動・ライト・ダークを循環し、最初の操作では現在の見た目と反対のテーマへ切り替える。明示選択はブラウザに保存する
+- 初期表示はダーク。ヘッダーのボタンでライト、OS連動、ダークの順に切り替え、選択をブラウザに保存する
 
 ## Page families
 
-- Home / tag / search: Index-First。記事ストリームとトピック一覧を優先し、宣伝的なヒーローは置かない
-- Post: Long Document。本文、メタデータ、Mermaid、コードを読みやすい一列の流れにする
-- About / 404: 短い本文中心。カードを増やさない
+- トップページは [ProjectDiscovery Research](https://projectdiscovery.io/research) を参考に、導入、記事件数と最新公開日、カード一覧、トピックの順に配置する
+- 検索結果とタグ一覧でもカードを共用する。画面幅に応じて3列、2列、1列に切り替える
+- 記事ページでは本文、メタデータ、Mermaid、コードを一列に配置する。About と 404 は短い本文を中心にする
 
 ## Shared chrome
 
-- Navigation: N9 edge-aligned minimal。記事一覧・Security・About、検索トリガー、テーマ切替だけを置く
-- Footer: Ft2 inline rule。短いクレジットとGitHub / RSSリンクを一行で閉じる
-- CTA: 塗りつぶしではなく下線付きテキストリンクを基本とし、検索など操作が必要な場面だけ暗いインクのボタンを使う
-- Accent: coralはキーボードフォーカス、現在地、短い注記に限定する。大面積には使わない
+- ヘッダーにはサイト名、記事一覧、Security、About、検索、テーマ切替を置く。狭い画面ではナビゲーションを2段目に置く
+- フッターには著者名とGitHub、リポジトリ、RSSへのリンクを置く
+- カード全体を記事へのリンクにする。公開元、読む時間、概要、公開日を表示し、タグに応じてCSSの図案を切り替える
+- アクセント色はキーボードフォーカス、リンク、図案に使う
 
 ## Constraints
 

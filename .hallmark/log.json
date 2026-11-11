@@ -1,5 +1,13 @@
 [
 	{
+		"date": "2026-11-12",
+		"macrostructure": "Catalogue / Long Document",
+		"theme": "Dark editorial",
+		"enrichment": "CSS card illustrations",
+		"brief": "redesign diary using the ProjectDiscovery Research index as a reference",
+		"scope": "app"
+	},
+	{
 		"date": "2026-07-28",
 		"macrostructure": "Index-First / Long Document",
 		"theme": "Coral",

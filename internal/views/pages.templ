@@ -18,33 +18,35 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 			<link rel="apple-touch-icon" href="https://avatars.githubusercontent.com/u/238946603?v=4"/>
 			<link rel="preconnect" href="https://fonts.googleapis.com"/>
 			<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
-			<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&family=Manrope:wght@500;600;700&display=swap" rel="stylesheet"/>
+			<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 			<script>
 				try {
 					const savedTheme = localStorage.getItem("diary-theme")
-					if (savedTheme === "light" || savedTheme === "dark") document.documentElement.dataset.theme = savedTheme
+					if (savedTheme === "light" || savedTheme === "system") document.documentElement.dataset.theme = savedTheme
 				} catch {}
 			</script>
-			<link rel="stylesheet" href="/assets/site.css?v=20260917-no-ads"/>
-			<script defer src="/assets/site.js?v=20260917-no-ads"></script>
-			<script type="module" src="/assets/mermaid.js"></script>
+			<link rel="stylesheet" href="/assets/site.css?v=20261112-research"/>
+			<script defer src="/assets/site.js?v=20261112-research"></script>
+			<script type="module" src="/assets/mermaid.js?v=20261112-research"></script>
 		</head>
 		<body>
 			<a class="skip-link" href="#main">本文へ移動</a>
 			<header class="site-header">
 				<div class="shell nav-shell">
-					<a class="brand" href="/">{ site.Title }</a>
+					<a class="brand" href="/"><span class="brand-mark" aria-hidden="true"></span>{ site.Title }</a>
 					<nav class="primary-nav" aria-label="主要ナビゲーション">
 						<a href="/">Articles</a>
 						<a href="/?q=CVE">Security</a>
 						<a href="/about">About</a>
 					</nav>
-					<button class="search-trigger" type="button" data-command-trigger aria-haspopup="dialog" aria-controls="command-palette" aria-label="記事を検索">
-						<span aria-hidden="true">⌕</span><span class="search-trigger__label">検索</span><span class="search-trigger__key" aria-hidden="true">⌘K</span>
-					</button>
-					<button class="theme-toggle" type="button" data-theme-toggle aria-label="表示テーマを切り替える">
-						<span class="theme-toggle__icon" data-theme-icon aria-hidden="true">◐</span><span class="theme-toggle__label" data-theme-label>自動</span>
-					</button>
+					<div class="nav-actions">
+						<button class="search-trigger" type="button" data-command-trigger aria-haspopup="dialog" aria-controls="command-palette" aria-label="記事を検索">
+							<span class="search-icon" aria-hidden="true"></span><span>検索</span><span class="search-trigger__key" aria-hidden="true">⌘K</span>
+						</button>
+						<button class="theme-toggle" type="button" data-theme-toggle aria-label="表示テーマを切り替える">
+							<span class="theme-toggle__icon" data-theme-icon aria-hidden="true">☾</span><span class="theme-toggle__label" data-theme-label>ダーク</span>
+						</button>
+					</div>
 				</div>
 			</header>
 			{ children... }
@@ -54,7 +56,7 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 				</div>
 			</footer>
 			<dialog class="command-palette" id="command-palette" aria-label="記事を検索">
-				<div class="command-head"><form action="/" method="get"><input class="command-input" id="command-query" name="q" type="search" placeholder="記事・CVE・タグを検索" autocomplete="off"/></form><button class="command-close" type="button" data-command-close aria-label="検索を閉じる">Esc</button></div>
+				<div class="command-head"><form action="/" method="get"><input class="command-input" id="command-query" name="q" type="search" aria-label="記事・CVE・タグを検索" placeholder="記事・CVE・タグを検索" autocomplete="off"/></form><button class="command-close" type="button" data-command-close aria-label="検索を閉じる">Esc</button></div>
 				<div class="command-results" role="listbox" aria-label="検索候補"><p class="command-group">Navigate</p><a class="command-item" data-command-item aria-selected="true" role="option" href="/"><span>すべての記事</span><span class="command-hint">/</span></a><a class="command-item" data-command-item aria-selected="false" role="option" href="/?q=CVE"><span>CVE・セキュリティを検索</span><span class="command-hint">CVE</span></a><a class="command-item" data-command-item aria-selected="false" role="option" href="/about"><span>About</span><span class="command-hint">info</span></a><a class="command-item" data-command-item aria-selected="false" role="option" href="/feed.xml"><span>RSS feed</span><span class="command-hint">xml</span></a></div>
 				<div class="command-foot"><span>↑ ↓ 移動</span><span>↵ 開く</span><span>Esc 閉じる</span></div>
 			</dialog>
@@ -65,66 +67,91 @@ templ Layout(site content.SiteConfig, pageTitle string) {
 templ HomePage(site content.SiteConfig, posts []content.Post, tags []content.Tag, query string) {
 	@Layout(site, "diary — "+site.AuthorName) {
 		<main id="main">
-			<section class="shell index-intro">
-				<h1>{ site.Title }</h1><p>{ site.Description }</p><span>{ site.AuthorName } · Go · Web · Security</span>
-				<p class="source-legend" aria-label="記事ソース"><span data-source="diary">独自記事</span><span data-source="zenn">Zenn</span></p>
-			</section>
-			<section class="shell index-layout">
-				<div class="index-main">
-					if query == "" && len(posts) > 0 {
-						<article class="lead-entry">
-							<p class="post-meta">{ posts[0].DisplayDate() } · { posts[0].ReadingMins } min read</p>
-							<h2><a href={ templ.SafeURL(posts[0].URL()) }>{ posts[0].Title }</a></h2>
-							<p>{ posts[0].Summary }</p>
-							<a class="text-link" href={ templ.SafeURL(posts[0].URL()) }>続きを読む →</a>
-						</article>
-					}
-					<div class="stream-heading">
-						if query != "" {
-							<h2>「{ query }」の検索結果</h2>
-						} else {
-							<h2>最新の記事</h2>
-						}
+			if query == "" {
+				<section class="index-intro">
+					<div class="shell">
+						<h1>開発とセキュリティの<span>技術ノート</span></h1>
+						<p>Go、Web開発、セキュリティを中心に、調べたことや手を動かして得た学びを記録しています。</p>
 					</div>
-					if len(posts) == 0 {
-						<p class="empty-state">条件に一致する記事はありません。別のキーワードを試してください。</p>
-					} else {
-						<div class="post-list">
-							for i, post := range posts {
-								if query != "" || i > 0 {
-									@PostCard(post)
-								}
-							}
-						</div>
+				</section>
+			} else {
+				<header class="shell archive-header search-header">
+					<a class="back-link" href="/">← 記事一覧</a>
+					<h1>「{ query }」の検索結果</h1>
+				</header>
+			}
+			<section class="shell index-layout" aria-label="記事一覧">
+				<div class="index-meta">
+					<span>記事 { len(posts) } 本</span>
+					if query == "" && len(posts) > 0 {
+						<span>最新記事 <time datetime={ posts[0].Published.Format("2006-01-02") }>{ posts[0].DisplayDate() }</time></span>
 					}
 				</div>
-				<aside class="topic-panel" aria-label="タグ一覧">
-					<h2>Topics</h2>
-					<div class="tag-list">
-						for _, tag := range tags {
-							<a href={ templ.SafeURL("/tags/" + url.PathEscape(tag.Name)) }>{ tag.Name } <span>{ tag.Count }</span></a>
-						}
-					</div>
-				</aside>
+				if len(posts) == 0 {
+					if query == "" {
+						<p class="empty-state">公開済みの記事はありません。</p>
+					} else {
+						<p class="empty-state">条件に一致する記事はありません。別のキーワードを試してください。</p>
+					}
+				} else {
+					@PostList(posts, false)
+				}
+				if len(tags) > 0 {
+					@TopicPanel("トピック", tags)
+				}
 			</section>
 		</main>
 	}
 }
 
-templ PostCard(post content.Post) {
-	<article class="post-card">
-		<p class="post-meta"><span class="source-label" data-source={ post.Source }>{ post.SourceLabel() }</span> { post.DisplayDate() } · { post.ReadingMins } min read</p>
-		<h3><a href={ templ.SafeURL(post.URL()) }>{ post.Title }</a></h3>
-		<p>{ post.Summary }</p>
-		<div class="post-card-bottom">
-			<div class="inline-tags">
-				for _, tag := range post.Tags {
-					<span>{ tag }</span>
-				}
-			</div>
-			<a aria-label={ post.Title+"を読む" } href={ templ.SafeURL(post.URL()) }>→</a>
+templ PostList(posts []content.Post, related bool) {
+	<div class="post-list">
+		for _, post := range posts {
+			<article class="post-card">
+				<a class="post-card-link" href={ templ.SafeURL(post.URL()) } aria-labelledby={ "card-" + post.Slug }>
+					<div class="post-cover" data-cover={ postCoverKind(post) } aria-hidden="true"><span class="cover-art"></span></div>
+					<div class="post-card-body">
+						<p class="post-meta"><span class="source-label" data-source={ post.Source }>{ post.SourceLabel() }</span><span>{ post.ReadingMins } min read</span></p>
+						if related {
+							<h3 class="post-card-title" id={ "card-" + post.Slug }>{ post.Title }</h3>
+						} else {
+							<h2 class="post-card-title" id={ "card-" + post.Slug }>{ post.Title }</h2>
+						}
+						<p class="post-card-summary">{ post.Summary }</p>
+					</div>
+					<div class="post-card-bottom">
+						<span class="post-card-action">続きを読む <span aria-hidden="true">↗</span></span>
+						<time datetime={ post.Published.Format("2006-01-02") }>{ post.DisplayDate() }</time>
+					</div>
+				</a>
+			</article>
+		}
+	</div>
+}
+
+func postCoverKind(post content.Post) string {
+	for _, tag := range post.Tags {
+		switch tag {
+		case "security", "web-security", "cve", "burp-suite":
+			return "network"
+		case "xnnpack", "simd", "cpu", "assembly", "compiler":
+			return "chip"
+		case "ai", "llm", "mamba", "pytorch", "機械学習", "画像認識":
+			return "matrix"
+		}
+	}
+	return "stack"
+}
+
+templ TopicPanel(title string, tags []content.Tag) {
+	<aside class="topic-panel">
+		<h2>{ title }</h2>
+		<div class="tag-list">
+			for _, tag := range tags {
+				<a href={ templ.SafeURL("/tags/" + url.PathEscape(tag.Name)) }><span class="tag-name">{ tag.Name }</span><span class="tag-count">{ tag.Count }</span></a>
+			}
 		</div>
-	</article>
+	</aside>
 }
 
 templ PostPage(site content.SiteConfig, post content.Post, related []content.Post) {
@@ -148,11 +175,7 @@ templ PostPage(site content.SiteConfig, post content.Post, related []content.Pos
 			if len(related) > 0 {
 				<section class="related">
 					<h2>あわせて読みたい</h2>
-					<div class="post-list">
-						for _, candidate := range related {
-							@PostCard(candidate)
-						}
-					</div>
+					@PostList(related, true)
 				</section>
 			}
 		</main>
@@ -163,19 +186,8 @@ templ TagPage(site content.SiteConfig, tag string, posts []content.Post, tags []
 	@Layout(site, tag+" — "+site.Title) {
 		<main id="main" class="shell archive">
 			<header class="archive-header"><a class="back-link" href="/">← 記事一覧</a><h1>{ tag }</h1><p class="archive-intro">{ len(posts) }本の記事</p></header>
-			<div class="post-list">
-				for _, post := range posts {
-					@PostCard(post)
-				}
-			</div>
-			<aside class="archive-tags">
-				<h2>ほかのテーマ</h2>
-				<div class="tag-list">
-					for _, item := range tags {
-						<a href={ templ.SafeURL("/tags/" + url.PathEscape(item.Name)) }>{ item.Name } <span>{ item.Count }</span></a>
-					}
-				</div>
-			</aside>
+			@PostList(posts, false)
+			@TopicPanel("ほかのテーマ", tags)
 		</main>
 	}
 }

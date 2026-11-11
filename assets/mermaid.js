@@ -2,10 +2,12 @@ const sourceBlocks = document.querySelectorAll("pre > code.language-mermaid");
 
 if (sourceBlocks.length > 0) {
   const { default: mermaid } = await import("https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs");
+  const mode = document.documentElement.dataset.theme;
+  const isDark = mode === "system" ? window.matchMedia("(prefers-color-scheme: dark)").matches : mode !== "light";
   mermaid.initialize({
     startOnLoad: false,
     securityLevel: "strict",
-    theme: window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "default",
+    theme: isDark ? "dark" : "default",
     flowchart: { htmlLabels: true, useMaxWidth: true },
   });
 
